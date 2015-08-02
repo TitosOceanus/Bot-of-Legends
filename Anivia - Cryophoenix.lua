@@ -69,7 +69,6 @@ local KillText = {}
 -- Updates --
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/TitosOceanus/Bot-of-Legends/master/Anivia%20-%20Cryophoenix.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
