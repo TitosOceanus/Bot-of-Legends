@@ -55,7 +55,7 @@
 ]]
 
 -- Variables -- 
-local version = "2.71"
+local version = "2.72"
 local author = "Titos"
 local Qobject = nil
 local Robject = nil
@@ -238,8 +238,14 @@ end
 -- Harass Settings --
 function Harass(unit)
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type and not LowMana() then
-		if Settings.harass.useQ then CastQ(unit) end
-		if Settings.harass.useE then CastE(unit) end
+		if Settings.harass.harasstype == 1 then
+			CastQ(unit)
+			CastE(unit)
+		end
+		if Settings.harass.harasstype == 2 then
+			CastR(unit)
+			CastE(unit)
+		end
 	end
 end
 
@@ -404,8 +410,7 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "harass")
 		Settings.harass:addParam("harassKey", "Harass Key", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
-		Settings.harass:addParam("useQ", "Use "..SkillQ.name.." (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
-		Settings.harass:addParam("useE", "Use "..SkillE.name.." (E) in Harass", SCRIPT_PARAM_ONOFF, true)
+		Settings.harass:addParam("harasstype", "Harass Type:", SCRIPT_PARAM_LIST, 1, {"Normal", "Quick"})
 		Settings.harass:addParam("harassMana", "Min. Mana Percent: ", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 		Settings.harass:permaShow("harassKey")
 
