@@ -55,7 +55,7 @@
 ]]
 
 -- Variables -- 
-local version = "2.72"
+local version = "2.721"
 local author = "Titos"
 local Qobject = nil
 local Robject = nil
@@ -457,7 +457,7 @@ function Menu()
 		Settings.interrupt:addParam("skill", "Skill to Interrupt:", SCRIPT_PARAM_LIST, 3, {"Q", "W", "Smart", "Off"})
 		local Interruptable = false
 		for index, data in pairs(isAChampToInterrupt) do
-			for inex, enemy in ipairs(GetEnemyHeroes()) do
+			for index, enemy in ipairs(GetEnemyHeroes()) do
 				if data['Champ'] == enemy.charName then
 					Settings.interrupt:addSubMenu(enemy.charName..' '..data.spellKey..'...', enemy.charName)
 					Settings.interrupt[enemy.charName]:addParam('stop', 'Interrupt '..enemy.charName..' '..data.spellKey, SCRIPT_PARAM_ONOFF, true)
