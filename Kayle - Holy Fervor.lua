@@ -10,7 +10,7 @@
 		1.0 - Script Release
 --]]
 
-local version = "1.01"
+local version = "1.011"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -416,7 +416,7 @@ function Healing()
 			CastSpell(_W, myHero)
 		elseif myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MaxHealSelf/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
-		elseif 
+		else
 			for i=1, heroManager.iCount do
 				local ally = heroManager:GetHero(i)
 				if ally.team == myHero.team and not ally.dead then
