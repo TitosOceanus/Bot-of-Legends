@@ -10,14 +10,10 @@
 		1.0 - Script Release
 --]]
 
-local version = "1.0111111"
+local version = "1.02"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
-local JungleMobs = {}
-local JungleFocusMobs = {}
-
-
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/TitosOceanus/Bot-of-Legends/master/Kayle%20-%20Holy%20Fervor.lua".."?rand="..math.random(1,10000)
@@ -63,89 +59,6 @@ function Variables()
 		ignite = SUMMONER_1
 	elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
 		ignite = SUMMONER_2
-	end
-
-	if GetGame().map.shortName == "twistedTreeline" then
-		TwistedTreeline = true
-	else
-		TwistedTreeline = false
-	end
-
-	if not TwistedTreeline then
-		JungleMobNames = { 
-			["SRU_MurkwolfMini2.1.3"]	= true,
-			["SRU_MurkwolfMini2.1.2"]	= true,
-			["SRU_MurkwolfMini8.1.3"]	= true,
-			["SRU_MurkwolfMini8.1.2"]	= true,
-			["SRU_BlueMini1.1.2"]		= true,
-			["SRU_BlueMini7.1.2"]		= true,
-			["SRU_BlueMini21.1.3"]		= true,
-			["SRU_BlueMini27.1.3"]		= true,
-			["SRU_RedMini10.1.2"]		= true,
-			["SRU_RedMini10.1.3"]		= true,
-			["SRU_RedMini4.1.2"]		= true,
-			["SRU_RedMini4.1.3"]		= true,
-			["SRU_KrugMini11.1.1"]		= true,
-			["SRU_KrugMini5.1.1"]		= true,
-			["SRU_RazorbeakMini9.1.2"]	= true,
-			["SRU_RazorbeakMini9.1.3"]	= true,
-			["SRU_RazorbeakMini9.1.4"]	= true,
-			["SRU_RazorbeakMini3.1.2"]	= true,
-			["SRU_RazorbeakMini3.1.3"]	= true,
-			["SRU_RazorbeakMini3.1.4"]	= true
-		}
-		
-		FocusJungleNames = {
-			["SRU_Blue1.1.1"]			= true,
-			["SRU_Blue7.1.1"]			= true,
-			["SRU_Murkwolf2.1.1"]		= true,
-			["SRU_Murkwolf8.1.1"]		= true,
-			["SRU_Gromp13.1.1"]			= true,
-			["SRU_Gromp14.1.1"]			= true,
-			["Sru_Crab16.1.1"]			= true,
-			["Sru_Crab15.1.1"]			= true,
-			["SRU_Red10.1.1"]			= true,
-			["SRU_Red4.1.1"]			= true,
-			["SRU_Krug11.1.2"]			= true,
-			["SRU_Krug5.1.2"]			= true,
-			["SRU_Razorbeak9.1.1"]		= true,
-			["SRU_Razorbeak3.1.1"]		= true,
-			["SRU_Dragon6.1.1"]			= true,
-			["SRU_Baron12.1.1"]			= true
-		}
-	else
-		FocusJungleNames = {
-			["TT_NWraith1.1.1"]			= true,
-			["TT_NGolem2.1.1"]			= true,
-			["TT_NWolf3.1.1"]			= true,
-			["TT_NWraith4.1.1"]			= true,
-			["TT_NGolem5.1.1"]			= true,
-			["TT_NWolf6.1.1"]			= true,
-			["TT_Spiderboss8.1.1"]		= true
-		}		
-		JungleMobNames = {
-			["TT_NWraith21.1.2"]		= true,
-			["TT_NWraith21.1.3"]		= true,
-			["TT_NGolem22.1.2"]			= true,
-			["TT_NWolf23.1.2"]			= true,
-			["TT_NWolf23.1.3"]			= true,
-			["TT_NWraith24.1.2"]		= true,
-			["TT_NWraith24.1.3"]		= true,
-			["TT_NGolem25.1.1"]			= true,
-			["TT_NWolf26.1.2"]			= true,
-			["TT_NWolf26.1.3"]			= true
-		}
-	end
-	
-	for i = 0, objManager.maxObjects do
-		local object = objManager:getObject(i)
-		if object and object.valid and not object.dead then
-			if FocusJungleNames[object.name] then
-				JungleFocusMobs[#JungleFocusMobs+1] = object
-			elseif JungleMobNames[object.name] then
-				JungleMobs[#JungleMobs+1] = object
-			end
-		end
 	end
 
 	EnemyMinions = minionManager(MINION_ENEMY, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
@@ -217,23 +130,6 @@ function OnDraw()
 	end]]
 end
 
-function ChaseText()
-	for i = 1, heroManager.iCount, 1 do
-		local enemy = heroManager:getHero(i)
-		if ValidTarget(enemy) then
-			if enemy.team ~= myHero.team then
-				if Chaseable == 1 then
-					ChaseText[i] = 1
-				elseif Chaseable == 2 then
-					ChaseText[i] = 2
-				else
-					ChaseText[i] = 3
-				end
-			end
-		end
-	end
-end
-
 function OnTick()
 	Target = GetOrbTarget()
 	ComboKey = Settings.Combo.ComboKey
@@ -278,6 +174,7 @@ function Menu()
 		Settings.Combo:addParam("UseW", "Use (W) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("BoostAlly", "Use (W) to Boost Ally", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.Combo:addParam("ChaseMana", "Min. Mana to Chase:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 		Settings.Combo:permaShow("ComboKey")
 
 	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
@@ -382,26 +279,15 @@ function LaneClear()
 end
 
 function JungleClear()
-	if Settings.Jungle.JungleKey then
-		local JungleMob = GetJungleMob()
-		
-		if JungleMob ~= nil then
-			if Settings.Jungle.UseQ and GetDistance(JungleMob) <= SkillQ.range and SkillQ.ready then
-				CastSpell(_Q, JungleMob)
-			end
-			if Settings.Jungle.UseE and GetDistance(JungleMob) <= SkillE.range and SkillE.ready then
-				CastSpell(_E)
-			end
+	JungleMinions:update()
+	JungleCreep = JungleMinions.objects[1]
+	if ValidTarget(JungleCreep) then
+		if SkillE.ready and GetDistance(JungleCreep) <= SkillE.range then
+			CastSpell(_E)
 		end
-	end
-end
-
-function GetJungleMob()
-	for _, Mob in pairs(JungleFocusMobs) do
-		if ValidTarget(Mob, SkillQ.range) then return Mob end
-	end
-	for _, Mob in pairs(JungleMobs) do
-		if ValidTarget(Mob, SkillQ.range) then return Mob end
+		if SkillQ.ready and GetDistance(JungleCreep) <= SkillQ.range then
+			CastSpell(_Q, JungleCreep)
+		end
 	end
 end
 
