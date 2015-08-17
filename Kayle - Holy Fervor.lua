@@ -10,7 +10,7 @@
 		1.0 - Script Release
 --]]
 
-local version = "1.01111"
+local version = "1.0111111"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -341,19 +341,14 @@ end
 
 function Combo(unit)
 	if ValidTarget(unit) and unit~= nil and unit.type == myHero.type then
-		ChaseText()
 		if Settings.Combo.UseQ and SkillQ.ready then
 			CastSpell(_Q, unit)
 		end
 		if Settings.Combo.UseW and SkillW.ready then
 			if GetDistance(unit) > 525 and GetDistance(unit) < 700 then
 				CastSpell(_W, myHero)
-				local Chaseable = 2
 			elseif Settings.Combo.BoostAlly and GetDistance(unit) > 525 and GetDistance(unit, ally) < 700 then
 				CastSpell(_W, ally)
-				local Chaseable = 3
-			else
-				local Chaseable = 1
 			end
 		end
 		if Settings.Combo.UseE and SkillE.ready then
@@ -447,7 +442,6 @@ function Killsteal()
 		if not enemy.dead and enemy.visible then
 			local qDmg = getDmg("Q", enemy, myHero)
 			local iDmg = (50 + (20 * myHero.level))
-			
 			if Settings.Killsteal.UseIgnite and Iready and iDmg > enemy.health and GetDistance(enemy) < 600 then
 				CastSpell(ignite, enemy)
 			elseif Settings.Killsteal.UseQ and qDmg > enemy.health and GetDistance(enemy) < SkillQ.range then
