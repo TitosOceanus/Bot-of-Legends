@@ -10,7 +10,7 @@
 		1.0 - Script Release
 --]]
 
-local version = "1.0111"
+local version = "1.01111"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -318,7 +318,7 @@ function Menu()
 		Settings.Ultimate:addSubMenu("Ultimate Preferences", "UltPref")
 			Settings.Ultimate.UltPref:addParam("MyUltHP", "My Maximum HP to Ult Self:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 			Settings.Ultimate.UltPref:addParam("MinSelfHP", "My Minimum HP to Ult Allies:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-			Settings.Ultimate.UltPref:addParam("MaxAllyHP", "Allies Maximum HP for Ult:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)]]
+			Settings.Ultimate.UltPref:addParam("MaxAllyHP", "Allies Maximum HP for Ult:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal Settings", "Killsteal")
 		Settings.Killsteal:addParam("UseQ", "Use (Q) to Killsteal", SCRIPT_PARAM_ONOFF, true)
