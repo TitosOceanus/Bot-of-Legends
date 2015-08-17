@@ -10,10 +10,13 @@
 		1.0 - Script Release
 --]]
 
-local version = "1.0"
+local version = "1.01"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
+local JungleMobs = {}
+local JungleFocusMobs = {}
+
 
 local AUTOUPDATE = true
 local UPDATE_HOST = "raw.github.com"
@@ -62,6 +65,89 @@ function Variables()
 		ignite = SUMMONER_2
 	end
 
+	if GetGame().map.shortName == "twistedTreeline" then
+		TwistedTreeline = true
+	else
+		TwistedTreeline = false
+	end
+
+	if not TwistedTreeline then
+		JungleMobNames = { 
+			["SRU_MurkwolfMini2.1.3"]	= true,
+			["SRU_MurkwolfMini2.1.2"]	= true,
+			["SRU_MurkwolfMini8.1.3"]	= true,
+			["SRU_MurkwolfMini8.1.2"]	= true,
+			["SRU_BlueMini1.1.2"]		= true,
+			["SRU_BlueMini7.1.2"]		= true,
+			["SRU_BlueMini21.1.3"]		= true,
+			["SRU_BlueMini27.1.3"]		= true,
+			["SRU_RedMini10.1.2"]		= true,
+			["SRU_RedMini10.1.3"]		= true,
+			["SRU_RedMini4.1.2"]		= true,
+			["SRU_RedMini4.1.3"]		= true,
+			["SRU_KrugMini11.1.1"]		= true,
+			["SRU_KrugMini5.1.1"]		= true,
+			["SRU_RazorbeakMini9.1.2"]	= true,
+			["SRU_RazorbeakMini9.1.3"]	= true,
+			["SRU_RazorbeakMini9.1.4"]	= true,
+			["SRU_RazorbeakMini3.1.2"]	= true,
+			["SRU_RazorbeakMini3.1.3"]	= true,
+			["SRU_RazorbeakMini3.1.4"]	= true
+		}
+		
+		FocusJungleNames = {
+			["SRU_Blue1.1.1"]			= true,
+			["SRU_Blue7.1.1"]			= true,
+			["SRU_Murkwolf2.1.1"]		= true,
+			["SRU_Murkwolf8.1.1"]		= true,
+			["SRU_Gromp13.1.1"]			= true,
+			["SRU_Gromp14.1.1"]			= true,
+			["Sru_Crab16.1.1"]			= true,
+			["Sru_Crab15.1.1"]			= true,
+			["SRU_Red10.1.1"]			= true,
+			["SRU_Red4.1.1"]			= true,
+			["SRU_Krug11.1.2"]			= true,
+			["SRU_Krug5.1.2"]			= true,
+			["SRU_Razorbeak9.1.1"]		= true,
+			["SRU_Razorbeak3.1.1"]		= true,
+			["SRU_Dragon6.1.1"]			= true,
+			["SRU_Baron12.1.1"]			= true
+		}
+	else
+		FocusJungleNames = {
+			["TT_NWraith1.1.1"]			= true,
+			["TT_NGolem2.1.1"]			= true,
+			["TT_NWolf3.1.1"]			= true,
+			["TT_NWraith4.1.1"]			= true,
+			["TT_NGolem5.1.1"]			= true,
+			["TT_NWolf6.1.1"]			= true,
+			["TT_Spiderboss8.1.1"]		= true
+		}		
+		JungleMobNames = {
+			["TT_NWraith21.1.2"]		= true,
+			["TT_NWraith21.1.3"]		= true,
+			["TT_NGolem22.1.2"]			= true,
+			["TT_NWolf23.1.2"]			= true,
+			["TT_NWolf23.1.3"]			= true,
+			["TT_NWraith24.1.2"]		= true,
+			["TT_NWraith24.1.3"]		= true,
+			["TT_NGolem25.1.1"]			= true,
+			["TT_NWolf26.1.2"]			= true,
+			["TT_NWolf26.1.3"]			= true
+		}
+	end
+	
+	for i = 0, objManager.maxObjects do
+		local object = objManager:getObject(i)
+		if object and object.valid and not object.dead then
+			if FocusJungleNames[object.name] then
+				JungleFocusMobs[#JungleFocusMobs+1] = object
+			elseif JungleMobNames[object.name] then
+				JungleMobs[#JungleMobs+1] = object
+			end
+		end
+	end
+
 	EnemyMinions = minionManager(MINION_ENEMY, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 	JungleMinions = minionManager(MINION_JUNGLE, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 end
@@ -92,7 +178,7 @@ end
 function GetOrbTarget()
 	TargetSelector:update()
 	if SACLoaded then return _G.AutoCarry.Crosshair:GetTarget() end
-	if SxOrbLoaded then return _G.SxOrb:GetTarget() end	
+	if SxOrbLoaded then return _G.SxOrb:GetTarget() end
 	return TargetSelector.target
 end
 
@@ -118,17 +204,17 @@ function OnDraw()
 			DrawCircle(Target.x, Target.y, Target.z, 100, ARGB(255, 255, 125, 0))
 		end
 	end
-	if Settings.Draw.ChaseText then
+--[[	if Settings.Draw.ChaseText then
 		for i = 1, heroManager.iCount do
 			local enemy = heroManager:getHero(i)
 			if ValidTarget(enemy) then
 				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
 				local PosX = barPos.x - 35
 				local PosY = barPos.y - 50
-				DrawText(TextList[ChaseText[i]], 15, PosX, PosY, ARGB(255, 255, 165, 0))
+				DrawText(TextList[ChaseText[i]]--[[, 15, PosX, PosY, ARGB(255, 255, 165, 0))
 			end
 		end
-	end
+	end]]
 end
 
 function ChaseText()
@@ -203,7 +289,6 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Clear Settings", "Clear")
 		Settings.Clear:addParam("ClearKey", "Clear Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
-		Settings.Clear:addParam("UseQ", "Use (Q) in Lane Clear", SCRIPT_PARAM_ONOFF, false)
 		Settings.Clear:addParam("UseE", "Use (E) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Clear:addParam("MinMana", "Min. Mana Percentage:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 		Settings.Clear:permaShow("ClearKey")
@@ -216,7 +301,9 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Heal Settings", "Heal")
 		Settings.Heal:addParam("HealKayle", "Heal Kayle", SCRIPT_PARAM_ONOFF, true)
-		Settings.Heal:addParam("Heal"..ally.charName.."", "Heal "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
+		for _, ally in ipairs(GetAllyHeroes()) do
+			Settings.Heal:addParam("Heal"..ally.charName.."", "Heal " ..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
+		end
 		Settings.Heal:addSubMenu("Healing Preferences", "HealPref")
 			Settings.Heal.HealPref:addParam("MaxHealSelf", "My Maximum HP to Heal Self:", SCRIPT_PARAM_SLICE, 75, 0, 100, 0)
 			Settings.Heal.HealPref:addParam("MinSelfHP", "My Minimum HP to Heal Allies:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
@@ -225,11 +312,13 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Ultimate Settings", "Ultimate")
 		Settings.Ultimate:addParam("UltimateKayle", "Ultimate Kayle", SCRIPT_PARAM_ONOFF, true)
-		Settings.Ultimate:addParam("Ultimate"..ally.charName.."", "Ultimate "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
+		for _, ally in ipairs(GetAllyHeroes()) do
+			Settings.Ultimate:addParam("Ultimate"..ally.charName.."", "Ultimate "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
+		end
 		Settings.Ultimate:addSubMenu("Ultimate Preferences", "UltPref")
 			Settings.Ultimate.UltPref:addParam("MyUltHP", "My Maximum HP to Ult Self:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 			Settings.Ultimate.UltPref:addParam("MinSelfHP", "My Minimum HP to Ult Allies:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-			Settings.Ultimate.UltPref:addParam("MaxAllyHP", "Allies Maximum HP for Ult:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
+			Settings.Ultimate.UltPref:addParam("MaxAllyHP", "Allies Maximum HP for Ult:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)]]
 
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal Settings", "Killsteal")
 		Settings.Killsteal:addParam("UseQ", "Use (Q) to Killsteal", SCRIPT_PARAM_ONOFF, true)
@@ -242,7 +331,6 @@ function Menu()
 		Settings.Draw:addParam("wDraw", "Draw "..SkillW.name.." (W) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.Draw:addParam("eDraw", "Draw "..SkillE.name.." (E) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.Draw:addParam("rDraw", "Draw "..SkillR.name.." (R) Range", SCRIPT_PARAM_ONOFF, true)
-		Settings.Draw:addParam("ChaseText", "Enable Chasing Text", SCRIPT_PARAM_ONOFF, true)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
 
@@ -291,31 +379,34 @@ end
 
 function LaneClear()
 	EnemyMinions:update()
-	local qDmg = getDmg("Q", unit, myHero)
 	for i, minions in pairs(EnemyMinions.objects) do
 		if Settings.Clear.UseE and myHero.mana > (myHero.maxMana * (Settings.Clear.MinMana/100)) and SkillE.ready then
 			CastSpell(_E)
-		end
-		if Settings.Clear.UseQ and myHero.mana > (myHero.maxMana * (Settings.Clear.MinMana/100)) and SkillQ.ready then
-			if qDmg > minion.health then
-				CastSpell(_Q, minion)
-			end
 		end
 	end
 end
 
 function JungleClear()
-	JungleMinions:update()
-	JungleCreep = JungleMinions.objects[1]
-	if ValidTarget(JungleCreep) and GetDistance(JungleCreep) < SkillE.range then
-		if Settings.Jungle.UseE and SkillE.ready and myHero.mana > (myHero.maxMana * (Settings.Clear.MinMana/100)) then
-			CastSpell(_E)
+	if Settings.Jungle.JungleKey then
+		local JungleMob = GetJungleMob()
+		
+		if JungleMob ~= nil then
+			if Settings.Jungle.UseQ and GetDistance(JungleMob) <= SkillQ.range and SkillQ.ready then
+				CastSpell(_Q, JungleMob)
+			end
+			if Settings.Jungle.UseE and GetDistance(JungleMob) <= SkillE.range and SkillE.ready then
+				CastSpell(_E)
+			end
 		end
 	end
-	if ValidTarget(JungleCreep) and GetDistance(JungleCreep) < SkillQ.range then
-		if Settings.Jungle.UseQ and SkillQ.ready and myHero.mana > (myHero.maxMana * (Settings.Jungle.MinMana/100)) then
-			CastSpell(_Q, JungleCreep)
-		end
+end
+
+function GetJungleMob()
+	for _, Mob in pairs(JungleFocusMobs) do
+		if ValidTarget(Mob, SkillQ.range) then return Mob end
+	end
+	for _, Mob in pairs(JungleMobs) do
+		if ValidTarget(Mob, SkillQ.range) then return Mob end
 	end
 end
 
@@ -325,9 +416,15 @@ function Healing()
 			CastSpell(_W, myHero)
 		elseif myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MaxHealSelf/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
-		elseif ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) then
-			if Settings.Heal[ally.charName] then
-				CastSpell(_W, ally)
+		elseif 
+			for i=1, heroManager.iCount do
+				local ally = heroManager:GetHero(i)
+				if ally.team == myHero.team and not ally.dead then
+					if GetDistance(ally) <= SkillW.range and ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) then
+						if Settings.Heal[ally.charName] then
+						CastSpell(_W, ally)
+					end
+				end
 			end
 		end
 	end
@@ -336,9 +433,16 @@ end
 function Intervention()
 	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) then
 		CastSpell(_R, myHero)
-	elseif Settings.Ultimate[ally.charName] and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MinSelfHP/100))) then
-		if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) then
-			CastSpell(_R, ally)
+	elseif
+		for i=1, heroManager.iCount do
+			local ally = heroManager:GetHero(i)
+			if ally.team == myHero.team and not ally.dead then
+				if GetDistance(ally) <= SkillW.range and Settings.Ultimate[ally.charName] and (myHero.health > (myHero.maxHealth * (Settings.Ultimate.UltPref.MinSelfHP/100))) then
+					if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) then
+						CastSpell(_R, ally)
+					end
+				end
+			end
 		end
 	end
 end
