@@ -8,9 +8,10 @@
 
 	Change Log:
 		1.0 - Script Release
+		1.03 - No W on Back
 --]]
 
-local version = "1.02"
+local version = "1.03"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -222,8 +223,7 @@ function Menu()
 		Settings.Killsteal:addParam("UseIgnite", "Use Ignite to Killsteal", SCRIPT_PARAM_ONOFF, true)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "Draw")
-		Settings.Draw:addParam("Disable", "Disable Range Drawings", SCRIPT_PARAM_ONOFF, true)
-		Settings.Draw:addParam("myHero", "Draw My Range", SCRIPT_PARAM_ONOFF, true)
+		Settings.Draw:addParam("Disable", "Disable Range Drawings", SCRIPT_PARAM_ONOFF, false)
 		Settings.Draw:addParam("qDraw", "Draw "..SkillQ.name.." (Q) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.Draw:addParam("wDraw", "Draw "..SkillW.name.." (W) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.Draw:addParam("eDraw", "Draw "..SkillE.name.." (E) Range", SCRIPT_PARAM_ONOFF, true)
@@ -292,7 +292,7 @@ function JungleClear()
 end
 
 function Healing()
-	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready then
+	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and not TargetHaveBuff("OdinRecall", myHero) then
 		if myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MinSelfHP/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
 		elseif myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MaxHealSelf/100)) and Settings.Heal.HealKayle then
@@ -336,4 +336,3 @@ function Killsteal()
 		end
 	end
 end
-
