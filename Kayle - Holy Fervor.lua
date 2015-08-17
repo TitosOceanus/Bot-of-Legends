@@ -10,7 +10,7 @@
 		1.0 - Script Release
 --]]
 
-local version = "1.011"
+local version = "1.0111"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -417,11 +417,9 @@ function Healing()
 		elseif myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MaxHealSelf/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
 		else
-			for i=1, heroManager.iCount do
-				local ally = heroManager:GetHero(i)
-				if ally.team == myHero.team and not ally.dead then
-					if GetDistance(ally) <= SkillW.range and ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) then
-						if Settings.Heal[ally.charName] then
+			for _, ally in ipairs(GetAllyHeroes()) do
+				if ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) then
+					if Settings.Heal[ally.charName] then
 						CastSpell(_W, ally)
 					end
 				end
@@ -433,14 +431,11 @@ end
 function Intervention()
 	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) then
 		CastSpell(_R, myHero)
-	elseif
-		for i=1, heroManager.iCount do
-			local ally = heroManager:GetHero(i)
-			if ally.team == myHero.team and not ally.dead then
-				if GetDistance(ally) <= SkillW.range and Settings.Ultimate[ally.charName] and (myHero.health > (myHero.maxHealth * (Settings.Ultimate.UltPref.MinSelfHP/100))) then
-					if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) then
-						CastSpell(_R, ally)
-					end
+	else
+		for _, ally in ipairs(GetAllyHeroes()) do
+			if GetDistance(ally) <= SkillW.range and Settings.Ultimate[ally.charName] and (myHero.health > (myHero.maxHealth * (Settings.Ultimate.UltPref.MinSelfHP/100))) then
+				if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) then
+					CastSpell(_R, ally)
 				end
 			end
 		end
