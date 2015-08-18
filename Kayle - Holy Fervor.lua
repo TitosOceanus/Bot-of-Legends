@@ -11,7 +11,7 @@
 		1.03 - No W on Back
 --]]
 
-local version = "1.031"
+local version = "1.04"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -310,7 +310,7 @@ function Healing()
 end
 
 function Intervention()
-	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) then
+	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) and not Settings.Jungle.JungleKey then
 		CastSpell(_R, myHero)
 	else
 		for _, ally in ipairs(GetAllyHeroes()) do
