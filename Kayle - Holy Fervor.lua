@@ -9,9 +9,11 @@
 	Change Log:
 		1.0 - Script Release
 		1.03 - No W on Back
+		1.04 - No Ult on Jungle
+		1.05 - Fixed ally heal/ult
 --]]
 
-local version = "1.04"
+local version = "1.05"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -198,9 +200,11 @@ function Menu()
 		Settings.Jungle:addParam("MinMana", "Min. Mana Percentage:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Heal Settings", "Heal")
+		Settings.Heal:addParam("HealKey", "Automatic Healing", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("H"))
+		Settings.Heal:permaShow("HealKey")
 		Settings.Heal:addParam("HealKayle", "Heal Kayle", SCRIPT_PARAM_ONOFF, true)
 		for _, ally in ipairs(GetAllyHeroes()) do
-			Settings.Heal:addParam("Heal"..ally.charName.."", "Heal " ..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
+			Settings.Heal:addParam(""..ally.charName.."", "Heal " ..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
 		end
 		Settings.Heal:addSubMenu("Healing Preferences", "HealPref")
 			Settings.Heal.HealPref:addParam("MaxHealSelf", "My Maximum HP to Heal Self:", SCRIPT_PARAM_SLICE, 75, 0, 100, 0)
@@ -209,9 +213,11 @@ function Menu()
 			Settings.Heal.HealPref:addParam("MinMana", "Minimum Mana to Heal:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Ultimate Settings", "Ultimate")
+		Settings.Ultimate:addParam("UltimateKey", "Automatic Ulting", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("U"))
+		Settings.Ultimate:permaShow("UltimateKey")
 		Settings.Ultimate:addParam("UltimateKayle", "Ultimate Kayle", SCRIPT_PARAM_ONOFF, true)
 		for _, ally in ipairs(GetAllyHeroes()) do
-			Settings.Ultimate:addParam("Ultimate"..ally.charName.."", "Ultimate "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
+			Settings.Ultimate:addParam(""..ally.charName.."", "Ultimate "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
 		end
 		Settings.Ultimate:addSubMenu("Ultimate Preferences", "UltPref")
 			Settings.Ultimate.UltPref:addParam("MyUltHP", "My Maximum HP to Ult Self:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
@@ -292,7 +298,7 @@ function JungleClear()
 end
 
 function Healing()
-	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and not Recalling() then
+	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and Settings.Heal.HealKey and not Recalling() then
 		if myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MinSelfHP/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
 		elseif myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MaxHealSelf/100)) and Settings.Heal.HealKayle then
@@ -310,7 +316,7 @@ function Healing()
 end
 
 function Intervention()
-	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) and not Settings.Jungle.JungleKey then
+	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) and Settings.Ultimate.UltKey and not Settings.Jungle.JungleKey then
 		CastSpell(_R, myHero)
 	else
 		for _, ally in ipairs(GetAllyHeroes()) do
