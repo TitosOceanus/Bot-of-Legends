@@ -11,7 +11,7 @@
 		1.03 - No W on Back
 --]]
 
-local version = "1.03"
+local version = "1.031"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -292,7 +292,7 @@ function JungleClear()
 end
 
 function Healing()
-	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and not TargetHaveBuff("OdinRecall", myHero) then
+	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and not Recalling() then
 		if myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MinSelfHP/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
 		elseif myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MaxHealSelf/100)) and Settings.Heal.HealKayle then
@@ -335,4 +335,14 @@ function Killsteal()
 			end
 		end
 	end
+end
+
+function Recalling()
+  for i = 1, myHero.buffCount do --iterates through your heroes buff's, buffCount=64
+    local recallBuff = myHero:getBuff(i) --Get's the buff contained in the buff table from the current iteration
+    if recallBuff.valid and recallBuff.name:lower():find('recall') then --you must check for validity as the buff will remain in the table until replaced
+      return true
+    end	
+  end
+  return false
 end
