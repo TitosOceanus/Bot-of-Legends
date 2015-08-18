@@ -11,9 +11,10 @@
 		1.03 - No W on Back
 		1.04 - No Ult on Jungle
 		1.05 - Fixed ally heal/ult
+		1.06 - Fixed ally heal/ult auto moving
 --]]
 
-local version = "1.05"
+local version = "1.06"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -248,9 +249,9 @@ function Combo(unit)
 			CastSpell(_Q, unit)
 		end
 		if Settings.Combo.UseW and SkillW.ready then
-			if GetDistance(unit) > 525 and GetDistance(unit) < 700 then
+			if GetDistance(unit) > 525 and GetDistance(unit) < 900 then
 				CastSpell(_W, myHero)
-			elseif Settings.Combo.BoostAlly and GetDistance(unit) > 525 and GetDistance(unit, ally) < 700 then
+			elseif Settings.Combo.BoostAlly and GetDistance(unit) > 525 and GetDistance(unit, ally) < 900 then
 				CastSpell(_W, ally)
 			end
 		end
@@ -305,7 +306,7 @@ function Healing()
 			CastSpell(_W, myHero)
 		else
 			for _, ally in ipairs(GetAllyHeroes()) do
-				if ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) then
+				if ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) and GetDistance(ally, myHero) < SkillW.range then
 					if Settings.Heal[ally.charName] then
 						CastSpell(_W, ally)
 					end
@@ -321,7 +322,7 @@ function Intervention()
 	else
 		for _, ally in ipairs(GetAllyHeroes()) do
 			if GetDistance(ally) <= SkillW.range and Settings.Ultimate[ally.charName] and (myHero.health > (myHero.maxHealth * (Settings.Ultimate.UltPref.MinSelfHP/100))) then
-				if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) then
+				if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) and GetDistance(ally, myHero) < SkillR.range then
 					CastSpell(_R, ally)
 				end
 			end
