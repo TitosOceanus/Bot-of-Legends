@@ -19,7 +19,7 @@
 			 - Min. Mana to Chase lowered
 --]]
 
-local version = "1.07"
+local version = "1.071"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -75,25 +75,6 @@ function Variables()
 
 	EnemyMinions = minionManager(MINION_ENEMY, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 	JungleMinions = minionManager(MINION_JUNGLE, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
-
-	AutoUlt = {
-                { charName = "Katarina",        spellName = "KatarinaR" ,                  important = 0},
-				{ charName = "Zed",             spellName = "zedult" ,                     important = 0},
-                { charName = "Galio",           spellName = "GalioIdolOfDurand" ,          important = 0},
-                { charName = "FiddleSticks",    spellName = "Crowstorm" ,                  important = 1},
-                { charName = "FiddleSticks",    spellName = "DrainChannel" ,               important = 1},
-                { charName = "Nunu",            spellName = "AbsoluteZero" ,               important = 0},
-                { charName = "Shen",            spellName = "ShenStandUnited" ,            important = 0},
-                { charName = "Urgot",           spellName = "UrgotSwap2" ,                 important = 0},
-                { charName = "Malzahar",        spellName = "AlZaharNetherGrasp" ,         important = 0},
-                { charName = "Karthus",         spellName = "FallenOne" ,                  important = 0},
-                { charName = "Pantheon",        spellName = "Pantheon_GrandSkyfall_Jump" , important = 0},
-                { charName = "Varus",           spellName = "VarusQ" ,                     important = 1},
-                { charName = "Caitlyn",         spellName = "CaitlynAceintheHole" ,        important = 1},
-                { charName = "MissFortune",     spellName = "MissFortuneBulletTime" ,      important = 1},
-                { charName = "Warwick",         spellName = "InfiniteDuress" ,             important = 0}
-	}
-
 end
 
 function LoadOrbwalker()
