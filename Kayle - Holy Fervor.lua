@@ -13,9 +13,13 @@
 		1.05 - Fixed ally heal/ult
 		1.06 - Fixed ally heal/ult auto moving
 		1.061 - Added ScriptStatus Update
+		1.07 - Added Auto Harass Feature
+             - Changed Menu
+			 - Small Change to JungleFarm()
+			 - Min. Mana to Chase lowered
 --]]
 
-local version = "1.061"
+local version = "1.07"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -71,6 +75,25 @@ function Variables()
 
 	EnemyMinions = minionManager(MINION_ENEMY, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 	JungleMinions = minionManager(MINION_JUNGLE, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
+
+	AutoUlt = {
+                { charName = "Katarina",        spellName = "KatarinaR" ,                  important = 0},
+				{ charName = "Zed",             spellName = "zedult" ,                     important = 0},
+                { charName = "Galio",           spellName = "GalioIdolOfDurand" ,          important = 0},
+                { charName = "FiddleSticks",    spellName = "Crowstorm" ,                  important = 1},
+                { charName = "FiddleSticks",    spellName = "DrainChannel" ,               important = 1},
+                { charName = "Nunu",            spellName = "AbsoluteZero" ,               important = 0},
+                { charName = "Shen",            spellName = "ShenStandUnited" ,            important = 0},
+                { charName = "Urgot",           spellName = "UrgotSwap2" ,                 important = 0},
+                { charName = "Malzahar",        spellName = "AlZaharNetherGrasp" ,         important = 0},
+                { charName = "Karthus",         spellName = "FallenOne" ,                  important = 0},
+                { charName = "Pantheon",        spellName = "Pantheon_GrandSkyfall_Jump" , important = 0},
+                { charName = "Varus",           spellName = "VarusQ" ,                     important = 1},
+                { charName = "Caitlyn",         spellName = "CaitlynAceintheHole" ,        important = 1},
+                { charName = "MissFortune",     spellName = "MissFortuneBulletTime" ,      important = 1},
+                { charName = "Warwick",         spellName = "InfiniteDuress" ,             important = 0}
+	}
+
 end
 
 function LoadOrbwalker()
@@ -125,42 +148,31 @@ function OnDraw()
 			DrawCircle(Target.x, Target.y, Target.z, 100, ARGB(255, 255, 125, 0))
 		end
 	end
---[[	if Settings.Draw.ChaseText then
-		for i = 1, heroManager.iCount do
-			local enemy = heroManager:getHero(i)
-			if ValidTarget(enemy) then
-				local barPos = WorldToScreen(D3DXVECTOR3(enemy.x, enemy.y, enemy.z))
-				local PosX = barPos.x - 35
-				local PosY = barPos.y - 50
-				DrawText(TextList[ChaseText[i]]--[[, 15, PosX, PosY, ARGB(255, 255, 165, 0))
-			end
-		end
-	end]]
 end
 
 function OnTick()
 	Target = GetOrbTarget()
-	ComboKey = Settings.Combo.ComboKey
-	HarassKey = Settings.Harass.HarassKey
-	ClearKey = Settings.Clear.ClearKey
+	ComboKey = Settings.Keybind.ComboKey
+	HarassKey = Settings.Keybind.HarassKey
+	ClearKey = Settings.Keybind.ClearKey
+	AutoHarass = Settings.Keybind.AutoHarass
+	AutoHeal = Settings.Keybind.HealKey
+	AutoUlt = Settings.Keybind.UltimateKey
 	Checks()
 	Healing()
 	Intervention()
 	Killsteal()
 
-	if Settings.Combo.ComboKey then
+	if ComboKey then
 		Combo(Target)
 	end
 
-	if Settings.Harass.HarassKey then
+	if HarassKey or AutoHarass then
 		Harass(Target)
 	end
 
-	if Settings.Clear.ClearKey then
+	if ClearKey then
 		LaneClear()
-	end
-	
-	if Settings.Jungle.JungleKey then
 		JungleClear()
 	end
 end
@@ -176,37 +188,39 @@ end
 function Menu()
 	Settings = scriptConfig("Kayle - Holy Fervor "..version.."", "Kayle")
 
+	Settings:addSubMenu("["..myHero.charName.."] - Keybind Settings", "Keybind")
+		Settings.Keybind:addParam("ComboKey", "Combo Key:", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		Settings.Keybind:addParam("HarassKey", "Harass Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
+		Settings.Keybind:addParam("AutoHarass", "Automatic Harass:", SCRIPT_PARAM_ONKEYTOGGLE, false, string.byte("T"))
+		Settings.Keybind:addParam("ClearKey", "Clear Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+		Settings.Keybind:addParam("HealKey", "Automatic Healing:", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("H"))
+		Settings.Keybind:addParam("UltimateKey", "Automatic Ulting:", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("U"))
+		Settings.Keybind:permaShow("AutoHarass")
+		Settings.Keybind:permaShow("HealKey")
+		Settings.Keybind:permaShow("UltimateKey")
+
 	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "Combo")
-		Settings.Combo:addParam("ComboKey", "Combo Key:", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 		Settings.Combo:addParam("UseQ", "Use (Q) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseW", "Use (W) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("BoostAlly", "Use (W) to Boost Ally", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
-		Settings.Combo:addParam("ChaseMana", "Min. Mana to Chase:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
-		Settings.Combo:permaShow("ComboKey")
+		Settings.Combo:addParam("ChaseMana", "Min. Mana to Chase:", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
-		Settings.Harass:addParam("HarassKey", "Harass Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
 		Settings.Harass:addParam("UseQ", "Use (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
 		Settings.Harass:addParam("UseE", "Use (E) in Harass", SCRIPT_PARAM_ONOFF, false)
 		Settings.Harass:addParam("MinMana", "Min. Mana Percentage:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
-		Settings.Harass:permaShow("HarassKey")
 
 	Settings:addSubMenu("["..myHero.charName.."] - Clear Settings", "Clear")
-		Settings.Clear:addParam("ClearKey", "Clear Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 		Settings.Clear:addParam("UseE", "Use (E) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Clear:addParam("MinMana", "Min. Mana Percentage:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-		Settings.Clear:permaShow("ClearKey")
 
 	Settings:addSubMenu("["..myHero.charName.."] - Jungle Settings", "Jungle")
-		Settings.Jungle:addParam("JungleKey", "Jungle Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
 		Settings.Jungle:addParam("UseQ", "Use (Q) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Jungle:addParam("UseE", "Use (E) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Jungle:addParam("MinMana", "Min. Mana Percentage:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Heal Settings", "Heal")
-		Settings.Heal:addParam("HealKey", "Automatic Healing", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("H"))
-		Settings.Heal:permaShow("HealKey")
 		Settings.Heal:addParam("HealKayle", "Heal Kayle", SCRIPT_PARAM_ONOFF, true)
 		for _, ally in ipairs(GetAllyHeroes()) do
 			Settings.Heal:addParam(""..ally.charName.."", "Heal " ..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
@@ -218,8 +232,6 @@ function Menu()
 			Settings.Heal.HealPref:addParam("MinMana", "Minimum Mana to Heal:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Ultimate Settings", "Ultimate")
-		Settings.Ultimate:addParam("UltimateKey", "Automatic Ulting", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("U"))
-		Settings.Ultimate:permaShow("UltimateKey")
 		Settings.Ultimate:addParam("UltimateKayle", "Ultimate Kayle", SCRIPT_PARAM_ONOFF, true)
 		for _, ally in ipairs(GetAllyHeroes()) do
 			Settings.Ultimate:addParam(""..ally.charName.."", "Ultimate "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
@@ -303,14 +315,14 @@ function JungleClear()
 end
 
 function Healing()
-	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and Settings.Heal.HealKey and not Recalling() then
+	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and Settings.Keybind.HealKey and not Recalling() then
 		if myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MinSelfHP/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
 		elseif myHero.health < (myHero.maxHealth * (Settings.Heal.HealPref.MaxHealSelf/100)) and Settings.Heal.HealKayle then
 			CastSpell(_W, myHero)
 		else
 			for _, ally in ipairs(GetAllyHeroes()) do
-				if ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) and GetDistance(ally, myHero) < SkillW.range then
+				if ally.health < (ally.maxHealth * (Settings.Heal.HealPref.MaxAllyHP/100)) and GetDistance(ally, myHero) < SkillW.range and not ally.dead then
 					if Settings.Heal[ally.charName] then
 						CastSpell(_W, ally)
 					end
@@ -321,7 +333,7 @@ function Healing()
 end
 
 function Intervention()
-	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) and Settings.Ultimate.UltKey and not Settings.Jungle.JungleKey then
+	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) and Settings.Keybind.UltKey and not Settings.Keybind.ClearKey then
 		CastSpell(_R, myHero)
 	else
 		for _, ally in ipairs(GetAllyHeroes()) do
