@@ -8,18 +8,27 @@
 
 	Change Log:
 		1.0 - Script Release
+		
 		1.03 - No W on Back
+		
 		1.04 - No Ult on Jungle
+		
 		1.05 - Fixed ally heal/ult
+		
 		1.06 - Fixed ally heal/ult auto moving
 		1.061 - Added ScriptStatus Update
+		
 		1.07 - Added Auto Harass Feature
              - Changed Menu
 			 - Small Change to JungleFarm()
 			 - Min. Mana to Chase lowered
+		1.072 - Fixed Q Cast in Combo/Harass
+		      - Fixed Chase with W (Kayle & Allies)
+			  - Fixed E Cast in Harass
+	    
 --]]
 
-local version = "1.071"
+local version = "1.072"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -241,19 +250,27 @@ function Menu()
 end
 
 function Combo(unit)
-	if ValidTarget(unit) and unit~= nil and unit.type == myHero.type then
+	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
 		if Settings.Combo.UseQ and SkillQ.ready then
-			CastSpell(_Q, unit)
+			if GetDistance(unit) <= SkillQ.range then
+				CastSpell(_Q, unit)
+			end
 		end
 		if Settings.Combo.UseW and SkillW.ready then
-			if GetDistance(unit) > 525 and GetDistance(unit) < 900 then
+			if GetDistance(unit) > SkillE.range then
 				CastSpell(_W, myHero)
-			elseif Settings.Combo.BoostAlly and GetDistance(unit) > 525 and GetDistance(unit, ally) < 900 then
-				CastSpell(_W, ally)
+			else
+				for _, ally in ipairs(GetAllyHeroes()) do
+					if GetDistance(ally, myHero) <= SkillW.range then
+						if GetDistance(ally, unit) <= SkillW.range then
+							CastSpell(_W, ally)
+						end
+					end
+				end
 			end
 		end
 		if Settings.Combo.UseE and SkillE.ready then
-			if GetDistance(unit) < 525 then
+			if GetDistance(unit) < SkillE.range then
 				CastSpell(_E)
 			end
 		end
@@ -261,13 +278,17 @@ function Combo(unit)
 end
 
 function Harass(unit)
-	if ValidTarget(unit) and unit~= nil and unit.type == myHero.type then
-		if myHero.mana > (myHero.maxMana * ( Settings.Harass.MinMana / 100)) then
+	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+		if myHero.mana > (myHero.maxMana * (Settings.Harass.MinMana / 100)) then
 			if Settings.Harass.UseQ and SkillQ.ready then
-				CastSpell(_Q, unit)
+				if GetDistance(unit) <= SkillQ.range then
+					CastSpell(_Q, unit)
+				end
 			end
-			if Settings.Harass.UseE and SkillE.ready and GetDistance(unit) < 525 then
-				CastSpell(_E)
+			if Settings.Harass.UseE and SkillE.ready then
+				if GetDistance(unit) < SkillE.range then
+					CastSpell(_E)
+				end
 			end
 		end
 	end
