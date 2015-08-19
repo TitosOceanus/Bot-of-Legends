@@ -19,9 +19,9 @@
 		1.061 - Added ScriptStatus Update
 		
 		1.07 - Added Auto Harass Feature
-             - Changed Menu
-			 - Small Change to JungleFarm()
-			 - Min. Mana to Chase lowered
+                     - Changed Menu
+		     - Small Change to JungleFarm()
+		     - Min. Mana to Chase lowered
 		1.072 - Fixed Q Cast in Combo/Harass
 		      - Fixed Chase with W (Kayle & Allies)
 			  - Fixed E Cast in Harass
