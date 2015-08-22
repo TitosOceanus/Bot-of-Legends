@@ -54,10 +54,12 @@
 		2.71 - Changed Update Directory
 		
 		2.73 - Fixed Q Cast on Killsteal
+
+		2.74 - Changed UPL Values slightly
 ]]
 
 -- Variables -- 
-local version = "2.73"
+local version = "2.74"
 local author = "Titos"
 local Qobject = nil
 local Robject = nil
@@ -286,7 +288,7 @@ end
 
 -- Killsteal Settings --
 function KillSteal()
-	for i, enemy in ipairs(GetEnemyHeroes()) do
+	for _, enemy in ipairs(GetEnemyHeroes()) do
 		if not enemy.dead and enemy.visible then
 			local eDmg = getDmg("E", enemy, myHero)
 			local iDmg = ((useIgnite and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
@@ -476,7 +478,7 @@ function Menu()
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "orbwalker")
 
 	Settings:addSubMenu("["..myHero.charName.."] - Prediction Settings", "Prediction")
-		UPL:AddToMenu(Settings.Prediction)
+		UPL:AddToMenu2(Settings.Prediction)
 
 	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillQ.range, DAMAGE_MAGIC, true)
 	TargetSelector.name = "Anivia"
@@ -786,7 +788,7 @@ function Variables()
 			},
 			
 			Support = {
-				"Alistar", "Blitzcrank", "Janna", "Karma", "Leona", "Lulu", "Nami", "Nunu", "Sona", "Soraka", "Taric", "Thresh", "Zilean", "Braum", "TahnKench"
+				"Alistar", "Blitzcrank", "Janna", "Karma", "Leona", "Lulu", "Nami", "Nunu", "Sona", "Soraka", "Taric", "Thresh", "Zilean", "Braum", "TahmKench"
 			},
 			
 			Tank = {
