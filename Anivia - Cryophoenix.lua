@@ -137,7 +137,6 @@ end
 function GetOrbTarget()
 	TargetSelector:update()
 	if SACLoaded then return _G.AutoCarry.Crosshair:GetTarget() end
-	if SxOrbLoaded then return _G.SxOrb:GetTarget() end
 	return TargetSelector.target
 end
 

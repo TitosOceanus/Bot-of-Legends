@@ -22,13 +22,17 @@
                      - Changed Menu
 		     - Small Change to JungleFarm()
 		     - Min. Mana to Chase lowered
+
 		1.072 - Fixed Q Cast in Combo/Harass
 		      - Fixed Chase with W (Kayle & Allies)
 			  - Fixed E Cast in Harass
-	    
+
+		1.073 - Added BOTRK/Cutlass/Zhonya's
+              - Self Ult Rework
+	          - Refixed Q Cast/E Cast
 --]]
 
-local version = "1.072"
+local version = "1.073"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -112,7 +116,6 @@ end
 function GetOrbTarget()
 	TargetSelector:update()
 	if SACLoaded then return _G.AutoCarry.Crosshair:GetTarget() end
-	if SxOrbLoaded then return _G.SxOrb:GetTarget() end
 	return TargetSelector.target
 end
 
@@ -194,6 +197,7 @@ function Menu()
 		Settings.Combo:addParam("UseW", "Use (W) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("BoostAlly", "Use (W) to Boost Ally", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.Combo:addParam("UseItems", "Use Items in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("ChaseMana", "Min. Mana to Chase:", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
@@ -227,9 +231,23 @@ function Menu()
 			Settings.Ultimate:addParam(""..ally.charName.."", "Ultimate "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
 		end
 		Settings.Ultimate:addSubMenu("Ultimate Preferences", "UltPref")
-			Settings.Ultimate.UltPref:addParam("MyUltHP", "My Maximum HP to Ult Self:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
+			Settings.Ultimate.UltPref:addParam("MyUltHP", "My Maximum HP to Ult Self:", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
 			Settings.Ultimate.UltPref:addParam("MinSelfHP", "My Minimum HP to Ult Allies:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-			Settings.Ultimate.UltPref:addParam("MaxAllyHP", "Allies Maximum HP for Ult:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
+			Settings.Ultimate.UltPref:addParam("MaxAllyHP", "Allies Maximum HP for Ult:", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
+
+	Settings:addSubMenu("["..myHero.charName.."] - Item Settings", "Items")
+		Settings.Items:addSubMenu("Blade of the Ruined King", "BOTRK")
+			Settings.Items.BOTRK:addParam("UseBOTRK", "Use BOTRK in Combo", SCRIPT_PARAM_ONOFF, true)
+			Settings.Items.BOTRK:addParam("MyHP", "My Maximum HP to use BOTRK:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+			Settings.Items.BOTRK:addParam("EnemyHP", "Enemy Minimum HP to use BOTRK:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+		Settings.Items:addSubMenu("Bilgewater Cutlass", "Cutlass")
+			Settings.Items.Cutlass:addParam("UseCutlass", "Use Bilgewater Cutlass in Combo", SCRIPT_PARAM_ONOFF, true)
+			Settings.Items.Cutlass:addParam("MyHP", "My Maximum HP to use Cutlass:", SCRIPT_PARAM_SLICE, 80, 0, 100, 0)
+			Settings.Items.Cutlass:addParam("EnemyHP", "Enemy Minimum HP to use Cutlass:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+		Settings.Items:addSubMenu("Zhonya's Hourglass", "Zhonya")
+			Settings.Items.Zhonya:addParam("UseZhonya", "Use Zhonya's Hourglass", SCRIPT_PARAM_ONOFF, true)
+			Settings.Items.Zhonya:addParam("MinHP", "Minimum HP to use Zhonyas", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
+			Settings.Items.Zhonya:addParam("Order", "Zhonya's Before or After Ult", SCRIPT_PARAM_LIST, 2, {"Before", "After"})
 
 	Settings:addSubMenu("["..myHero.charName.."] - KillSteal Settings", "Killsteal")
 		Settings.Killsteal:addParam("UseQ", "Use (Q) to Killsteal", SCRIPT_PARAM_ONOFF, true)
@@ -244,13 +262,13 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
 
-	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, 900, DAMAGE_MAGIC, true)
+	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, 900, DAMAGE_MAGIC)
 	TargetSelector.name = "Kayle"
 	Settings:addTS(TargetSelector)
 end
 
 function Combo(unit)
-	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
+	if ValidTarget(unit) then
 		if Settings.Combo.UseQ and SkillQ.ready then
 			if GetDistance(unit) <= SkillQ.range then
 				CastSpell(_Q, unit)
@@ -272,6 +290,32 @@ function Combo(unit)
 		if Settings.Combo.UseE and SkillE.ready then
 			if GetDistance(unit) < SkillE.range then
 				CastSpell(_E)
+			end
+		end
+		if Settings.Combo.UseItems then
+			if Settings.Items.BOTRK.UseBOTRK then
+				local BOTRKSlot = GetInventorySlotItem(3153)
+				if myHero.health < (myHero.maxHealth * (Settings.Items.BOTRK.MyHP / 100)) then
+					if unit.health > (unit.maxHealth * (Settings.Items.BOTRK.EnemyHP / 100)) then
+						if BOTRKSlot ~= nil and myHero:CanUseSpell(BOTRKSlot) == READY then
+							if GetDistance(unit) <= 550 then
+								CastSpell(BOTRKSlot, unit)
+							end
+						end
+					end
+				end
+			end
+			if Settings.Items.Cutlass.UseCutlass then
+				local CutlassSlot = GetInventorySlotItem(3144)
+				if myHero.health < (myHero.maxHealth * (Settings.Items.Cutlass.MyHP / 100 )) then
+					if unit.health > (unit.maxHealth * (Settings.Items.Cutlass.EnemyHP / 100 )) then
+						if CutlassSlot ~= nil and myHero:CanUseSpell(CutlassSlot) == READY then
+							if GetDistance(unit) <= 550 then
+								CastSpell(CutlassSlot, unit)
+							end
+						end
+					end
+				end
 			end
 		end
 	end
@@ -315,6 +359,7 @@ function JungleClear()
 		end
 	end
 end
+			
 
 function Healing()
 	if myHero.mana > (myHero.maxMana * (Settings.Heal.HealPref.MinMana/100)) and SkillW.ready and Settings.Keybind.HealKey and not Recalling() then
@@ -335,12 +380,47 @@ function Healing()
 end
 
 function Intervention()
-	if Settings.Ultimate.UltimateKayle and (myHero.health < (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100))) and Settings.Keybind.UltKey and not Settings.Keybind.ClearKey then
-		CastSpell(_R, myHero)
+	local ZhonyaSlot = GetInventorySlotItem(3157)
+	if myHero.health <= (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100)) then
+		if Settings.Ultimate.UltimateKayle then
+			if Settings.Keybind.UltKey and not Settings.Keybind.Clearkey then
+				if not Settings.Items.Zhonya.UseZhonya then
+					if SkillR.ready then 
+						CastSpell(_R, myHero)
+					end
+				else 
+					if Settings.Items.Zhonya.Order == 2 then
+						if SkillR.ready then
+							CastSpell(_R, myHero)
+						else
+							if myHero:CanUseSpell(ZhonyaSlot) == READY and ZhonyaSlot ~= nil then
+								if myHero.health <= (myHero.maxHealth * (Settings.Items.Zhonya.MinHP/100)) then
+									CastSpell(ZhonyaSlot)
+								end
+							end
+						end
+					else
+						if myHero:CanUseSpell(ZhonyaSlot) == READY and ZhonyaSlot ~= nil then
+							if myHero.health <= (myHero.maxHealth * (Settings.Items.Zhonya.MinHP/100)) then
+								CastSpell(ZhonyaSlot)
+							end
+						else
+							CastSpell(_R, myHero)
+						end
+					end
+				end
+			end
+		else
+			if Settings.Items.Zhonya.UseZhonya and ZhonyaSlot ~= nil then
+				if myHero.health <= (myHero.maxHealth * (Settings.Items.Zhonya.MinHP/100)) then
+					CastSpell(ZhonyaSlot)
+				end
+			end
+		end
 	else
 		for _, ally in ipairs(GetAllyHeroes()) do
-			if GetDistance(ally) <= SkillW.range and Settings.Ultimate[ally.charName] and (myHero.health > (myHero.maxHealth * (Settings.Ultimate.UltPref.MinSelfHP/100))) then
-				if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) and GetDistance(ally, myHero) < SkillR.range then
+			if GetDistance(ally) <= SkillR.range and Settings.Ultimate[ally.charName] then
+				if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) then
 					CastSpell(_R, ally)
 				end
 			end
