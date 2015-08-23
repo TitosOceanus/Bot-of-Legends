@@ -31,9 +31,10 @@
               - Self Ult Rework
 	          - Refixed Q Cast/E Cast
 		1.0731 - New Script Status Info
+		1.074 - Won't Ult Without Enemies
 --]]
 
-local version = "1.073"
+local version = "1.074"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -381,7 +382,7 @@ end
 
 function Intervention()
 	local ZhonyaSlot = GetInventorySlotItem(3157)
-	if myHero.health <= (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100)) then
+	if myHero.health <= (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100)) and CountEnemyHeroInRange(SkillQ.range, myHero) > 0 then
 		if Settings.Ultimate.UltimateKayle then
 			if Settings.Keybind.UltKey and not Settings.Keybind.Clearkey then
 				if not Settings.Items.Zhonya.UseZhonya then
@@ -419,7 +420,7 @@ function Intervention()
 		end
 	else
 		for _, ally in ipairs(GetAllyHeroes()) do
-			if GetDistance(ally) <= SkillR.range and Settings.Ultimate[ally.charName] then
+			if GetDistance(ally) <= SkillR.range and Settings.Ultimate[ally.charName] and CountEnemyHeroInRange(650, ally) > 0 then
 				if ally.health < (ally.maxHealth * (Settings.Ultimate.UltPref.MaxAllyHP/100)) then
 					CastSpell(_R, ally)
 				end
