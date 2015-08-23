@@ -52,16 +52,10 @@
 
 		2.7 - Added Interrupter
 		2.71 - Changed Update Directory
-		
-		2.73 - Fixed Q Cast on Killsteal
-
-		2.74 - Changed UPL Values slightly
-		2.741 - Fixed my stupidity
-		2.742 - Changed SxOrb Target Selecting
 ]]
 
 -- Variables -- 
-local version = "2.742"
+local version = "2.743"
 local author = "Titos"
 local Qobject = nil
 local Robject = nil
@@ -289,7 +283,7 @@ end
 
 -- Killsteal Settings --
 function KillSteal()
-	for _, enemy in ipairs(GetEnemyHeroes()) do
+	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if not enemy.dead and enemy.visible then
 			local eDmg = getDmg("E", enemy, myHero)
 			local iDmg = ((useIgnite and Iready and getDmg("IGNITE", enemy, myHero)) or 0)
@@ -310,13 +304,11 @@ end
 -- Skill Specifics --
 -- Q --
 function CastQ(unit)
-	if unit ~= nil and unit == myHero.type then
-		if GetDistance(unit) <= SkillQ.range and SkillQ.ready and not Qobj then
-			local CastPosition, HitChance, HeroPosition = UPL:Predict(_Q, myHero, unit)
+	if ValdTarget(unit) and GetDistance(unit) <= SkillQ.range and SkillQ.ready and not Qobj then
+		local CastPosition, HitChance, HeroPosition = UPL:Predict(_Q, myHero, unit)
 		
-			if HitChance >= 2 then
-				CastSpell(_Q, CastPosition.x, CastPosition.z)
-			end
+		if HitChance >= 2 then
+			CastSpell(_Q, CastPosition.x, CastPosition.z)
 		end
 	end
 end
@@ -464,7 +456,7 @@ function Menu()
 		Settings.interrupt:addParam("skill", "Skill to Interrupt:", SCRIPT_PARAM_LIST, 3, {"Q", "W", "Smart", "Off"})
 		local Interruptable = false
 		for index, data in pairs(isAChampToInterrupt) do
-			for index, enemy in ipairs(GetEnemyHeroes()) do
+			for inex, enemy in ipairs(GetEnemyHeroes()) do
 				if data['Champ'] == enemy.charName then
 					Settings.interrupt:addSubMenu(enemy.charName..' '..data.spellKey..'...', enemy.charName)
 					Settings.interrupt[enemy.charName]:addParam('stop', 'Interrupt '..enemy.charName..' '..data.spellKey, SCRIPT_PARAM_ONOFF, true)
@@ -479,7 +471,7 @@ function Menu()
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "orbwalker")
 
 	Settings:addSubMenu("["..myHero.charName.."] - Prediction Settings", "Prediction")
-		UPL:AddToMenu2(Settings.Prediction)
+		UPL:AddToMenu(Settings.Prediction)
 
 	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillQ.range, DAMAGE_MAGIC, true)
 	TargetSelector.name = "Anivia"
@@ -779,7 +771,7 @@ function Variables()
 	end
 
 	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
-	_G.DrawCircle = DrawCircle2
+	_G.DrawCircle = DrawCircle
 
 	priorityTable = {
 			AP = {
@@ -789,7 +781,7 @@ function Variables()
 			},
 			
 			Support = {
-				"Alistar", "Blitzcrank", "Janna", "Karma", "Leona", "Lulu", "Nami", "Nunu", "Sona", "Soraka", "Taric", "Thresh", "Zilean", "Braum", "TahmKench"
+				"Alistar", "Blitzcrank", "Janna", "Karma", "Leona", "Lulu", "Nami", "Nunu", "Sona", "Soraka", "Taric", "Thresh", "Zilean", "Braum", "TahnKench"
 			},
 			
 			Tank = {
