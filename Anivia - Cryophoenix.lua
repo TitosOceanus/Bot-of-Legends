@@ -57,10 +57,11 @@
 
 		2.74 - Changed UPL Values slightly
 		2.741 - Fixed my stupidity
+		2.742 - Changed SxOrb Target Selecting
 ]]
 
 -- Variables -- 
-local version = "2.741"
+local version = "2.742"
 local author = "Titos"
 local Qobject = nil
 local Robject = nil
