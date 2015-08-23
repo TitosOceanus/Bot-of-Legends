@@ -56,10 +56,11 @@
 		2.73 - Fixed Q Cast on Killsteal
 
 		2.74 - Changed UPL Values slightly
+		2.741 - Fixed my stupidity
 ]]
 
 -- Variables -- 
-local version = "2.74"
+local version = "2.741"
 local author = "Titos"
 local Qobject = nil
 local Robject = nil
@@ -309,7 +310,7 @@ end
 -- Skill Specifics --
 -- Q --
 function CastQ(unit)
-	if unit ~= nil andand unit == myHero.type then
+	if unit ~= nil and unit == myHero.type then
 		if GetDistance(unit) <= SkillQ.range and SkillQ.ready and not Qobj then
 			local CastPosition, HitChance, HeroPosition = UPL:Predict(_Q, myHero, unit)
 		
