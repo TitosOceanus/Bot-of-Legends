@@ -55,7 +55,7 @@
 ]]
 
 -- Variables -- 
-local version = "2.743"
+local version = "2.7431"
 local author = "Titos"
 local Qobject = nil
 local Robject = nil
