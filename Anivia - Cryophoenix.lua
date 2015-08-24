@@ -304,7 +304,7 @@ end
 -- Skill Specifics --
 -- Q --
 function CastQ(unit)
-	if ValdTarget(unit) and GetDistance(unit) <= SkillQ.range and SkillQ.ready and not Qobj then
+	if ValidTarget(unit) and GetDistance(unit) <= SkillQ.range and SkillQ.ready and not Qobj then
 		local CastPosition, HitChance, HeroPosition = UPL:Predict(_Q, myHero, unit)
 		
 		if HitChance >= 2 then
