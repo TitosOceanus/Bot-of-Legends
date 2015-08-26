@@ -32,9 +32,14 @@
 	          - Refixed Q Cast/E Cast
 		1.0731 - New Script Status Info
 		1.074 - Won't Ult Without Enemies
+
+		1.075 - Changed Ultimate Logic (Very Basic Now)
+              - Fixed Q/E calls on jungling
+              - Temporarily removed ally ulting
+              - Temporarily disabled automatic Zhonyas
 --]]
 
-local version = "1.074"
+local version = "1.075"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -232,7 +237,7 @@ function Menu()
 			Settings.Ultimate:addParam(""..ally.charName.."", "Ultimate "..ally.charName.."", SCRIPT_PARAM_ONOFF, true)
 		end
 		Settings.Ultimate:addSubMenu("Ultimate Preferences", "UltPref")
-			Settings.Ultimate.UltPref:addParam("MyUltHP", "My Maximum HP to Ult Self:", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
+			Settings.Ultimate.UltPref:addParam("MyUltHP", "My Maximum HP to Ult Self:", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 			Settings.Ultimate.UltPref:addParam("MinSelfHP", "My Minimum HP to Ult Allies:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 			Settings.Ultimate.UltPref:addParam("MaxAllyHP", "Allies Maximum HP for Ult:", SCRIPT_PARAM_SLICE, 25, 0, 100, 0)
 
@@ -342,7 +347,7 @@ end
 function LaneClear()
 	EnemyMinions:update()
 	for i, minions in pairs(EnemyMinions.objects) do
-		if Settings.Clear.UseE and myHero.mana > (myHero.maxMana * (Settings.Clear.MinMana/100)) and SkillE.ready then
+		if Settings.Clear.UseE and myHero.mana >= (myHero.maxMana * (Settings.Clear.MinMana/100)) and SkillE.ready then
 			CastSpell(_E)
 		end
 	end
@@ -352,10 +357,10 @@ function JungleClear()
 	JungleMinions:update()
 	JungleCreep = JungleMinions.objects[1]
 	if ValidTarget(JungleCreep) then
-		if SkillE.ready and GetDistance(JungleCreep) <= SkillE.range then
+		if SkillE.ready and GetDistance(JungleCreep) <= SkillE.range and Settings.Jungle.UseE then
 			CastSpell(_E)
 		end
-		if SkillQ.ready and GetDistance(JungleCreep) <= SkillQ.range then
+		if SkillQ.ready and GetDistance(JungleCreep) <= SkillQ.range and Settings.Jungle.UseQ then
 			CastSpell(_Q, JungleCreep)
 		end
 	end
@@ -381,7 +386,18 @@ function Healing()
 end
 
 function Intervention()
-	local ZhonyaSlot = GetInventorySlotItem(3157)
+	if Settings.Ultimate.UltimateKayle then
+		if Settings.Keybind.UltKey and not Settings.Keybind.Clearkey then
+			if (myHero.health) <= ((Settings.Ultimate.UltPref.MyUltHP/100) * myHero.maxHealth) and CountEnemyHeroInRange(SkillE.range, myHero) > 0 then
+				if SkillR.ready then
+					CastSpell(_R, myHero)
+				end
+			end
+		end
+	end
+end
+
+--[[	local ZhonyaSlot = GetInventorySlotItem(3157)
 	if myHero.health <= (myHero.maxHealth * (Settings.Ultimate.UltPref.MyUltHP/100)) and CountEnemyHeroInRange(SkillQ.range, myHero) > 0 then
 		if Settings.Ultimate.UltimateKayle then
 			if Settings.Keybind.UltKey and not Settings.Keybind.Clearkey then
@@ -427,7 +443,7 @@ function Intervention()
 			end
 		end
 	end
-end
+end]]
 
 function Killsteal()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
