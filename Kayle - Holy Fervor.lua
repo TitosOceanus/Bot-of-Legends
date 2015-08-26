@@ -388,7 +388,7 @@ end
 function Intervention()
 	if Settings.Ultimate.UltimateKayle then
 		if Settings.Keybind.UltKey and not Settings.Keybind.Clearkey then
-			if (myHero.health) <= ((Settings.Ultimate.UltPref.MyUltHP/100) * myHero.maxHealth) and CountEnemyHeroInRange(SkillE.range, myHero) > 0 then
+			if ((myHero.health/myHero.maxHealth) * 100) <= (Settings.Ultimate.UltPref.MyUltHP) and CountEnemyHeroInRange(SkillE.range, myHero) > 0 then
 				if SkillR.ready then
 					CastSpell(_R, myHero)
 				end
