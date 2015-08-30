@@ -132,7 +132,20 @@ function OnTick()
 		Combo()
 	end
 
+	if HarassKey then
+		Harass()
+	end
+
+	if ClearKey then
+		LaneClear()
+		JungleClear()
+	end
+
 	Checks()
+
+	if Settings.Killsteal.Killsteal then
+		Killsteal()
+	end
 end
 
 function Checks()
@@ -162,7 +175,8 @@ function Menu()
 		Settings.Harass:addParam("UseE", "Use (E) in Harass", SCRIPT_PARAM_ONOFF, true)
 		Settings.Harass:addParam("MinMana", "Minimum Mana Percentage:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 		
-	Settings:addSubMenu("["..myHero.charName.."] - Killsteal Settings", "Killsteal")	
+	Settings:addSubMenu("["..myHero.charName.."] - Killsteal Settings", "Killsteal")
+		Settings.Killsteal:addParam("Killsteal", "Enable Kill Stealing?", SCRIPT_PARAM_ONOFF, true)
 		Settings.Killsteal:addParam("UseQ", "Use (Q) in Killsteal", SCRIPT_PARAM_ONOFF, true)
 		Settings.Killsteal:addParam("UseE", "Use (E) in Killsteal", SCRIPT_PARAM_ONOFF, true)
 		Settings.Killsteal:addParam("UseR", "Use (R) in Killsteal", SCRIPT_PARAM_ONOFF, true)	
@@ -189,6 +203,29 @@ function Menu()
 	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.range)
 	TargetSelector.name = "XinZhao"
 	Settings:addTS(TargetSelector)
+end
+
+function Combo(Target)
+	if ValidTarget(Target) then
+		if Settings.Combo.UseR == 1 then
+			DefaultCombo(Target)
+		elseif Settings.Combo.UseR == 2 then
+			if SkillR.ready then
+				if CountEnemyHeroInRange(SkillE.range, myHero) == 1 and not TargetHaveBuff("xenzhaointimidate", Target) then
+					if GetDistance(Target) <= SkillR.range then
+						CastSpell(_R)
+						if SACLoaded then
+							AA = 0
+						end
+					end
+				else
+					DefaultCombo(Target)
+				end
+			else
+				DefaultCombo(Target)
+			end
+		end
+	end
 end
 
 function DefaultCombo(Target)
@@ -220,29 +257,58 @@ function DefaultCombo(Target)
 	end
 end
 
-function Combo(Target)
-	if ValidTarget(Target) then
-		if Settings.Combo.UseR == 1 then
-			DefaultCombo(Target)
-		elseif Settings.Combo.UseR == 2 then
-			if SkillR.ready then
-				if CountEnemyHeroInRange(SkillE.range, myHero) == 1 and not TargetHaveBuff("xenzhaointimidate", Target) then
-					if GetDistance(Target) <= SkillR.range then
-						CastSpell(_R)
-						if SACLoaded then
-							AA = 0
-						end
-					end
-				else
-					DefaultCombo(Target)
-				end
-			else
-				DefaultCombo(Target)
+function Harass(Target)
+	if (myHero.mana >= (myHero.maxMana * (Settings.Harass.MinMana / 100))) then
+		if GetDistance(Target) <= SkillE.range and Settings.Harass.UseE then
+			CastSpell(_E, Target)
+			if SACLoaded then
+				AA = 0
+			end
+		end
+		if GetDistance(Target) <= SkillQ.range and Settings.Harass.UseQ then
+			CastSpell(_Q)
+			if SACLoaded then
+				AA = 0
 			end
 		end
 	end
 end
 
+function LaneClear() 
+	EnemyMinions:update()
+	if (myHero.mana >= (myHero.maxMana * (Settings.Lane.MinMana / 100))) then
+		for i, minion in pairs(EnemyMinions.objects) do
+			if Settings.Lane.UseE and SkillE.ready then
+				local eDmg = getDmg("E", minion, myHero)
+				if minion.health <= eDmg then
+					CastSpell(_E, minion)
+				end
+			end
+			if Settings.Lane.UseQ and SkillQ.ready then
+				local qDmg = getDmg("Q", minion, myHero)
+				if minion.health <= qDmg then
+					CastSpell(_Q)
+				end
+			end
+		end
+	end
+end
+
+function JungleClear()
+	JungleMinions:update()
+	for i, minion in ipairs(JungleMinions.objects) do
+		if GetDistance(minion) <= SkillE.range and SkillE.ready and Settings.Jungle.UseE then
+			CastSpell(_E, minion)
+		end
+		if GetDistance(minion) <= 175 and SkillQ.ready and Settings.Jungle.UseQ then
+			CastSpell(_Q)
+		end
+		if GetDistance(minion) <= 175 and SkillW.ready and Settings.Jungle.UseW then
+			CastSpell(_W)
+		end
+	end
+end
+			
 function OnProcessSpell(unit, spell)
 	if unit.isMe and SACLoaded then
 		if spell.name:lower():find("attack") then
@@ -252,36 +318,35 @@ function OnProcessSpell(unit, spell)
 end
 
 function Killsteal()
-	if(Settings.Killsteal==false)then return end
-
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if not enemy.dead and enemy.visible then
-			if enemy ~=nil then
-				if GetDistance(enemy) <= 175 and SkillQ.ready then
-					local ADdmg = myHero:CalcDamage(enemy, dmgQ)
-					if enemy.health <= ADdmg and Settings.Killsteal.UseQ then
-						if(SACLoaded) then
-							_G.AutoCarry.Orbwalker:Orbwalk(enemy)
-						else
-							SxOrb:ForceTarget(enemy)
-						end
+		if not enemy.dead and enemy.visible and enemy ~= nil then
+			if GetDistance(enemy) <= 175 and SkillQ.ready then
+				local ADdmg = myHero:CalcDamage(enemy, dmgQ)
+				if enemy.health <= ADdmg and Settings.Killsteal.UseQ then
+					if(SACLoaded) then
+						_G.AutoCarry.Orbwalker:Orbwalk(enemy)
+						AA = 0
+					else
+						SxOrb:ForceTarget(enemy)
 					end
-				elseif GetDistance(enemy) <= SkillE.range then
-					local Magicdmg = myHero:CalcMagicDamage(target, dmgE)
-					if enemy.health <= Magicdmg and SkillE.ready and Settings.Killsteal.UseE then
-						CastSpell(_E, enemy)
+					CastSpell(_Q)
+				end
+			elseif GetDistance(enemy) <= SkillE.range then
+				local Magicdmg = myHero:CalcMagicDamage(target, dmgE)
+				if enemy.health <= Magicdmg and SkillE.ready and Settings.Killsteal.UseE then
+					CastSpell(_E, enemy)
+					if SACLoaded then
+						AA = 0
 					end
 				end
-				local ADdmg = myHero:CalcDamage(enemy, dmgR)
-				if GetDistance(enemy) <= SkillR.range and enemy.health <= ADdmg and SkillR.ready and Settings.Killsteal.UseR then
-					CastSpell(_R)
-				end
+			end
+			local ADdmg = myHero:CalcDamage(enemy, dmgR)
+			if GetDistance(enemy) <= SkillR.range and enemy.health <= ADdmg and SkillR.ready and Settings.Killsteal.UseR then
+				CastSpell(_R)
 			end
 		end
 	end
 end
-
-
 
 
 
