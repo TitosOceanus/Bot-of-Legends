@@ -10,3 +10,5 @@ To Do:
 8) Combo Toggle: Smart & Normal
 9) Drag/Baron/Buff steal w/ E
 10) Flash -> Combo
+11) Auto Attack Kill Text
+12) Damage on Enemy HP Bar
