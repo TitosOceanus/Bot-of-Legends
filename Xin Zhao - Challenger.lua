@@ -89,14 +89,7 @@ function Variables()
 
 	EnemyMinions = minionManager(MINION_ENEMY, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 	JungleMinions = minionManager(MINION_JUNGLE, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
-end
 
-function Checks()
-	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
-	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
-	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
-	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
-	Iready = (ignite ~= nil and myHero:CanUseSpell(ignite) == READY)
 end
 
 function LoadOrbwalker()
@@ -144,6 +137,22 @@ function OnDraw()
 	end
 end		
 
+function OnTick()
+	if ComboKey then
+		Combo()
+	end
+
+	Checks()
+end
+
+function Checks()
+	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
+	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
+	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
+	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
+	Iready = (ignite ~= nil and myHero:CanUseSpell(ignite) == READY)
+end
+
 function Menu()
 	Settings = scriptConfig("Xin Zhao - Challenger "..version.."", "XinZhao")
 	
@@ -156,7 +165,7 @@ function Menu()
 		Settings.Combo:addParam("UseQ", "Use (Q) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseW", "Use (W) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
-		Settings.Combo:addParam("UseR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.Combo:addParam("UseR", "Use (R) in Combo:", SCRIPT_PARAM_LIST, 1, {"Normal", "1v1"}
 
 	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
 		Settings.Harass:addParam("UseQ", "Use (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
@@ -174,10 +183,6 @@ function Menu()
 		Settings.Jungle:addParam("UseW", "Use (W) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Jungle:addParam("UseE", "USe (E) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
 
-	Settings:addSubMenu("["..myHero.charName.."] - Skill Settings", "Skill")
-		Settings.Skill:addSubMenu("["..SkillR.name.."] (R) Settings", "RSkill")
-			Settings.Skill.RSkill:addParam("StunCount", "Minimum Enemies to Stun:", SCRIPT_PARAM_SLICE, 2, 0, 5, 0)
-
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "Draw")
 		Settings.Draw:addParam("Disable", "Disable Range Drawings", SCRIPT_PARAM_ONOFF, false)
 		Settings.Draw:addParam("eDraw", "Draw "..SkillE.name.." (E) Range", SCRIPT_PARAM_ONOFF, true)
@@ -191,16 +196,53 @@ function Menu()
 	Settings:addTS(TargetSelector)
 end
 
-function Combo(target)
-	if ValidTarget(target) and GetDistance(target) <= 175 then
-		if SACLoaded then
-			if SkillQ.ready and AA >= 1
-				CastSpell(_Q)
+function DefaultCombo(target)
+	if ValidTarget(target) then
+		if GetDistance(target) <= SkillE.range and SkillE.ready then
+			CastSpell(_E, target)
+			if SACLoaded then
 				AA = 0
 			end
-		else
-			if SkillQ.ready then
+		end
+		-- 3 because one is challenged.
+		if CountEnemyHeroInRange(SkillR.range, myHero) >= 3 and SkillR.ready then
+			CastSpell(_R)
+			if SACLoaded then
+				AA = 0
+			end
+		end
+		if GetDistance(target) <= 175 then	
+			if SACLoaded and AA >= 1 and SkillQ.ready then
 				CastSpell(_Q)
+				AA = 0
+			elseif SkillQ.ready and not SACLoaded then
+				CastSpell(_Q)
+			end
+			if SkillW.ready then
+				CastSpell(_W)
+			end
+		end
+	end
+end
+
+function Combo(target)
+	if ValidTarget(target) then
+		if Settings.Combo.UseR == 1 then
+			DefaultCombo()
+		elseif Settings.Combo.UseR == 2 then
+			if SkillR.ready then
+				if CountEnemyHeroInRange(SkillE.range, myHero) == 1 and not TargetHaveBuff("xenzhaointimidate", target) then
+					if GetDistance(target) <= SkillR.range then
+						CastSpell(_R)
+						if SACLoaded then
+							AA = 0
+						end
+					end
+				else
+					DefaultCombo()
+				end
+			else
+				DefaultCombo()
 			end
 		end
 	end
@@ -209,17 +251,6 @@ end
 function OnProcessSpell(unit, spell)
 	if unit.isMe and SACLoaded then
 		if spell.name:lower():find("attack") then
-			AA = AA + 1
-		end
-		if spell.name:find("XenZhaoThrust") then
-			AA = AA + 1
-		end
-	
-		if spell.name:find("XenZhaoThrust2") then
-			AA = AA + 1
-		end
-
-		if spell.name:find("XenZhaoThrust3") then
 			AA = AA + 1
 		end
 	end
