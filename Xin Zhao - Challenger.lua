@@ -166,7 +166,7 @@ function Menu()
 	Settings:addSubMenu("["..myHero.charName.."] - Lane Settings", "Lane")
 		Settings.Lane:addParam("UseQ", "Use (Q) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Lane:addParam("UseW", "Use (W) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
-		Settings.Lane:addParam("UseE", "Use (E) in Lane Clear", SCRIPT_PARAM_ONOFF, false)
+		Settings.Lane:addParam("UseE", "Use (E) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Lane:addParam("MinMana", "Minimum Mana Percentage:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Jungle Settings", "Jungle")
@@ -186,12 +186,44 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
 
-	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, 600)
+	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.ready)
 	TargetSelector.name = "XinZhao"
 	Settings:addTS(TargetSelector)
 end
 
+function Combo(target)
+	if ValidTarget(target) and GetDistance(target) <= 175 then
+		if SACLoaded then
+			if SkillQ.ready and AA >= 1
+				CastSpell(_Q)
+				AA = 0
+			end
+		else
+			if SkillQ.ready then
+				CastSpell(_Q)
+			end
+		end
+	end
+end
 
+function OnProcessSpell(unit, spell)
+	if unit.isMe and SACLoaded then
+		if spell.name:lower():find("attack") then
+			AA = AA + 1
+		end
+		if spell.name:find("XenZhaoThrust") then
+			AA = AA + 1
+		end
+	
+		if spell.name:find("XenZhaoThrust2") then
+			AA = AA + 1
+		end
+
+		if spell.name:find("XenZhaoThrust3") then
+			AA = AA + 1
+		end
+	end
+end
 
 
 
