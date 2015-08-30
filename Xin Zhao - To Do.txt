@@ -1,0 +1,10 @@
+To Do:
+
+1) Combo
+2) Harass
+3) Lane Clear
+4) Jungle Clear
+5) Autoattack Reset
+6) Ult Interrupter
+7) Combo Toggle: Smart & Normal
+8) Drag/Baron/Buff steal w/ E
