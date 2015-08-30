@@ -161,6 +161,11 @@ function Menu()
 		Settings.Harass:addParam("UseQ", "Use (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
 		Settings.Harass:addParam("UseE", "Use (E) in Harass", SCRIPT_PARAM_ONOFF, true)
 		Settings.Harass:addParam("MinMana", "Minimum Mana Percentage:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+		
+	Settings:addSubMenu("["..myHero.charName.."] - Killsteal Settings", "Killsteal")	
+		Settings.Killsteal:addParam("UseQ", "Use (Q) in Killsteal", SCRIPT_PARAM_ONOFF, true)
+		Settings.Killsteal:addParam("UseE", "Use (E) in Killsteal", SCRIPT_PARAM_ONOFF, true)
+		Settings.Killsteal:addParam("UseR", "Use (R) in Killsteal", SCRIPT_PARAM_ONOFF, true)	
 
 	Settings:addSubMenu("["..myHero.charName.."] - Lane Settings", "Lane")
 		Settings.Lane:addParam("UseQ", "Use (Q) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
@@ -245,6 +250,54 @@ function OnProcessSpell(unit, spell)
 		end
 	end
 end
+
+function Killsteal()
+	if(Settings.Killsteal==false)then return end
+	local target= GetOrbTarget()
+		
+		if(target~=nil)then
+				if(GetDistance(target)<=175)then
+					local ADdmg= myHero:CalcDamage(target, dmgQ)
+					if(GetDistance(target)<=175 and target.health<=ADdmg and SkillQ.ready and Settings.Killsteal.UseQ )then
+					
+						if(SACLoaded)then
+							_G.AutoCarry.Orbwalker:Orbwalk(target)
+						end
+					
+						if(SxOrbLoaded)then
+							SxOrb:ForceTarget(target)
+						end
+					
+						CastSpell(_Q)
+					end
+					local Magicdmg = myHero:CalcMagicDamage(target, dmgE)		
+				if(GetDistance(target)<=SkillE.range and target.health<=Magicdmg and SkillE.ready and Settings.Killsteal.UseE)then
+					CastSpell(_E,target)
+				end
+				local ADdmg=myHero:CalcDamage(target,dmgR)
+					if(GetDistance(target)<=SkillR.range and target.health<=ADdmg and SkillR.ready and Settings.Killsteal.UseR)then
+						CastSpell(_R)
+					end	
+				end
+				else
+				local Magicdmg= myHero:CalcMagicDamage(target, dmgE)	
+					if(GetDistance(target)<=SkillE.range and target.health<=Magicdmg and SkillE.ready and Settings.Killsteal.UseE)then
+							CastSpell(_E,target)
+					end
+					local ADdmg= myHero:CalcDamage(target, dmgQ)
+					if(GetDistance(target)<=SkillE.range and target.health<=ADdmg and SkillQ.ready and Settings.Killsteal.UseQ and SkillE.ready )then
+						CastSpell(_E,target)
+						CastSpell(_Q)
+					end
+					local ADdmg= myHero:CalcDamage(target, dmgR)
+					if(GetDistance(target)<=SkillE.range and target.health<=ADdmg and SkillR.ready and Settings.Killsteal.UseR)then
+						CastSpell(_E,target)
+						CastSpell(_R)
+					end
+				end
+		end
+end
+
 
 
 
