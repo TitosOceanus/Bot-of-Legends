@@ -25,7 +25,7 @@ local UPDATE_PATH = "/TitosOceanus/Bot-of-Legends/master/Xin%20Zhao%20-%20Challe
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 
-function _AutoupdaterMsg(msg) print("<font color=\"#FFA500\"><b>Kayle:</b></font> <font color=\"#FFD700\">"..msg..".</font>") end
+function _AutoupdaterMsg(msg) print("<font color=\"#B40404\"><b>Xin Zhao:</b></font> <font color=\"#FFD700\">"..msg..".</font>") end
 if AUTOUPDATE then
 	local ServerData = GetWebResult(UPDATE_HOST, "/TitosOceanus/Bot-of-Legends/master/version/Kayle.version")
 	if ServerData then
@@ -48,9 +48,30 @@ if myHero.charName ~= "XinZhao" then return end
 
 function OnLoad()
 	print("<b><font color=\"#00FFFF\">Titos and GeorgeDude: <font color=\"#B40404\">Xin Zhao <font color=\"#FFFF00\">- <font color=\"#B40404\">Challenger <font color=\"#FFFF00\">["..version.."] <font color=\"#B40404\">Loaded.</font>")
-	Menu()
 	Variables()
+	Menu()
 	DelayAction(function() LoadOrbwalker() end, 10)
+end
+
+function OnTick()
+	Target = GetOrbTarget()
+	ComboKey = Settings.Keybind.ComboKey
+	HarassKey = Settings.Keybind.HarassKey
+	ClearKey = Settings.Keybind.ClearKey
+	Checks()
+
+	if ComboKey then
+		Combo()
+	end
+
+	if HarassKey then
+		Harass()
+	end
+
+	if ClearKey then
+		LaneClear()
+		JungleClear()
+	end
 end
 
 function Variables()
@@ -59,9 +80,23 @@ function Variables()
 	SkillE = { name = "Audacious Charge", range = 600, ready = false }
 	SkillR = { name = "Crescent Sweep", range = 187.5, ready = false }
 
+	local ignite = nil
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then
+		ignite = SUMMONER_1
+	elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
+		ignite = SUMMONER_2
+	end
+
 	EnemyMinions = minionManager(MINION_ENEMY, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 	JungleMinions = minionManager(MINION_JUNGLE, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
-	
+end
+
+function Checks()
+	SkillQ.ready = (myHero:CanUseSpell(_Q) == READY)
+	SkillW.ready = (myHero:CanUseSpell(_W) == READY)
+	SkillE.ready = (myHero:CanUseSpell(_E) == READY)
+	SkillR.ready = (myHero:CanUseSpell(_R) == READY)
+	Iready = (ignite ~= nil and myHero:CanUseSpell(ignite) == READY)
 end
 
 function LoadOrbwalker()
@@ -92,6 +127,22 @@ function GetOrbTarget()
 	if SACLoaded then return _G.AutoCarry.Crosshair:GetTarget() end
 	return TargetSelector.target
 end
+
+function OnDraw()
+	if not myHero.dead and not Settings.Draw.Disable then
+		if SkillE.ready and Settings.Draw.eDraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillE.range, ARGB(255, 180, 4, 0))
+		end
+		
+		if SkillR.ready and Settings.Draw.rDraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, ARGB(255, 180, 4, 0))
+		end
+	
+		if Settings.Draw.targetcircle and Target then
+			DrawCircle(Target.x, Target.y, Target.z, 100, ARGB(255, 180, 4, 0))
+		end
+	end
+end		
 
 function Menu()
 	Settings = scriptConfig("Xin Zhao - Challenger "..version.."", "XinZhao")
@@ -127,9 +178,15 @@ function Menu()
 		Settings.Skill:addSubMenu("["..SkillR.name.."] (R) Settings", "RSkill")
 			Settings.Skill.RSkill:addParam("StunCount", "Minimum Enemies to Stun:", SCRIPT_PARAM_SLICE, 2, 0, 5, 0)
 
+	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "Draw")
+		Settings.Draw:addParam("Disable", "Disable Range Drawings", SCRIPT_PARAM_ONOFF, false)
+		Settings.Draw:addParam("eDraw", "Draw "..SkillE.name.." (E) Range", SCRIPT_PARAM_ONOFF, true)
+		Settings.Draw:addParam("rDraw", "Draw "..SkillR.name.." (R) Range", SCRIPT_PARAM_ONOFF, true)
+		Settings.Draw:addParam("targetcircle", "Draw Target Circle", SCRIPT_PARAM_ONOFF, true)
+
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
 
-	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.range)
+	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, 600)
 	TargetSelector.name = "XinZhao"
 	Settings:addTS(TargetSelector)
 end
