@@ -12,3 +12,4 @@ To Do:
 - Auto Attack Kill Text
 - Damage on Enemy HP Bar
 - Flash -> Insec
+- Automatic Ult on Enemy Count
