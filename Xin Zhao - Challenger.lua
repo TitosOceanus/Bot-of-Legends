@@ -86,6 +86,19 @@ function Menu()
 	
 	Settings:addSubMenu("["..myHero.charName.."] - Keybind Settings", "Keybind")
 		Settings.Keybind:addParam("ComboKey", "Combo Key:", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+		Settings.Keybind:addParam("HarassKey", "Harass Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
+		Settings.Keybind:addParam("ClearKey", "Clear Key:", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("V"))
+		
+	Settings:addSubMenu("["..myHero.charName.."] - Combo Settings", "Combo")
+		Settings.Combo:addParam("UseQ", "Use (Q) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.Combo:addParam("UseW", "Use (W) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.Combo:addParam("UseE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
+		Settings.Combo:addParam("UseR", "Use (R) in Combo", SCRIPT_PARAM_ONOFF, true)
+
+	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
+		Settings.Harass:addParam("UseQ", "Use (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
+		Settings.Harass:addParam("UseE", "Use (E) in Harass", SCRIPT_PARAM_ONOFF, true)
+		Settings.Harass:addParam("MinMana", "Minimum Mana to Harass:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 end
 
 
