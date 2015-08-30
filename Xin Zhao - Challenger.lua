@@ -68,7 +68,7 @@ function Variables()
 	SkillQ = { name = "Three Talon Strike", range = nil, ready = false }
 	SkillW = { name = "Battle Cry", range = nil, ready = false }
 	SkillE = { name = "Audacious Charge", range = 600, ready = false }
-	SkillR = { name = "Crescent Sweep", range = 187.5, ready = false }
+	SkillR = { name = "Crescent Sweep", range = 500, ready = false }
 
 	local ignite = nil
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then
@@ -128,12 +128,18 @@ function OnDraw()
 end		
 
 function OnTick()
+	Target = GetOrbTarget()
+	ComboKey = Settings.Keybind.ComboKey
+	HarassKey = Settings.Keybind.HarassKey
+	ClearKey = Settings.ClearKey
+
+
 	if ComboKey then
-		Combo()
+		Combo(Target)
 	end
 
 	if HarassKey then
-		Harass()
+		Harass(Target)
 	end
 
 	if ClearKey then
@@ -168,7 +174,7 @@ function Menu()
 		Settings.Combo:addParam("UseQ", "Use (Q) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseW", "Use (W) in Combo", SCRIPT_PARAM_ONOFF, true)
 		Settings.Combo:addParam("UseE", "Use (E) in Combo", SCRIPT_PARAM_ONOFF, true)
-		Settings.Combo:addParam("UseR", "Use (R) in Combo:", SCRIPT_PARAM_LIST, 1, {"Normal", "1v1"}
+		Settings.Combo:addParam("UseR", "Use (R) in Combo:", SCRIPT_PARAM_LIST, 1, {"Normal", "1v1"})
 
 	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
 		Settings.Harass:addParam("UseQ", "Use (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
@@ -180,6 +186,7 @@ function Menu()
 		Settings.Killsteal:addParam("UseQ", "Use (Q) in Killsteal", SCRIPT_PARAM_ONOFF, true)
 		Settings.Killsteal:addParam("UseE", "Use (E) in Killsteal", SCRIPT_PARAM_ONOFF, true)
 		Settings.Killsteal:addParam("UseR", "Use (R) in Killsteal", SCRIPT_PARAM_ONOFF, true)	
+		Settings.Killsteal:permaShow("Killsteal")
 
 	Settings:addSubMenu("["..myHero.charName.."] - Lane Settings", "Lane")
 		Settings.Lane:addParam("UseQ", "Use (Q) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
@@ -200,7 +207,7 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
 
-	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.range)
+	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.range, DAMAGE_PHYSICAL, true)
 	TargetSelector.name = "XinZhao"
 	Settings:addTS(TargetSelector)
 end
@@ -214,9 +221,6 @@ function Combo(Target)
 				if CountEnemyHeroInRange(SkillE.range, myHero) == 1 and not TargetHaveBuff("xenzhaointimidate", Target) then
 					if GetDistance(Target) <= SkillR.range then
 						CastSpell(_R)
-						if SACLoaded then
-							AA = 0
-						end
 					end
 				else
 					DefaultCombo(Target)
@@ -230,27 +234,18 @@ end
 
 function DefaultCombo(Target)
 	if ValidTarget(Target) then
-		if GetDistance(Target) <= SkillE.range and SkillE.ready then
+		if GetDistance(Target) <= SkillE.range and SkillE.ready and Settings.Combo.UseE then
 			CastSpell(_E, Target)
-			if SACLoaded then
-				AA = 0
-			end
 		end
 		-- 3 because one is challenged.
 		if CountEnemyHeroInRange(SkillR.range, myHero) >= 3 and SkillR.ready then
 			CastSpell(_R)
-			if SACLoaded then
-				AA = 0
-			end
 		end
 		if GetDistance(Target) <= 175 then	
-			if SACLoaded and AA >= 1 and SkillQ.ready then
-				CastSpell(_Q)
-				AA = 0
-			elseif SkillQ.ready and not SACLoaded then
+			if SkillQ.ready and Settings.Combo.UseQ then
 				CastSpell(_Q)
 			end
-			if SkillW.ready then
+			if SkillW.ready and Settings.Combo.UseW then
 				CastSpell(_W)
 			end
 		end
@@ -261,15 +256,9 @@ function Harass(Target)
 	if (myHero.mana >= (myHero.maxMana * (Settings.Harass.MinMana / 100))) then
 		if GetDistance(Target) <= SkillE.range and Settings.Harass.UseE then
 			CastSpell(_E, Target)
-			if SACLoaded then
-				AA = 0
-			end
 		end
 		if GetDistance(Target) <= SkillQ.range and Settings.Harass.UseQ then
 			CastSpell(_Q)
-			if SACLoaded then
-				AA = 0
-			end
 		end
 	end
 end
@@ -309,39 +298,35 @@ function JungleClear()
 	end
 end
 			
-function OnProcessSpell(unit, spell)
+--[[ function OnProcessSpell(unit, spell)
 	if unit.isMe and SACLoaded then
 		if spell.name:lower():find("attack") then
 			AA = AA + 1
 		end
 	end
-end
+end ]]
 
 function Killsteal()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		if not enemy.dead and enemy.visible and enemy ~= nil then
 			if GetDistance(enemy) <= 175 and SkillQ.ready then
-				local ADdmg = myHero:CalcDamage(enemy, dmgQ)
-				if enemy.health <= ADdmg and Settings.Killsteal.UseQ then
+				local qDmg = getDmg("Q", enemy, myHero)
+				if enemy.health <= qDmg and Settings.Killsteal.UseQ then
 					if(SACLoaded) then
 						_G.AutoCarry.Orbwalker:Orbwalk(enemy)
-						AA = 0
 					else
 						SxOrb:ForceTarget(enemy)
 					end
 					CastSpell(_Q)
 				end
 			elseif GetDistance(enemy) <= SkillE.range then
-				local Magicdmg = myHero:CalcMagicDamage(target, dmgE)
-				if enemy.health <= Magicdmg and SkillE.ready and Settings.Killsteal.UseE then
+				local eDmg = getDmg("E", enemy, myHero)
+				if enemy.health <= eDmg and SkillE.ready and Settings.Killsteal.UseE then
 					CastSpell(_E, enemy)
-					if SACLoaded then
-						AA = 0
-					end
 				end
 			end
-			local ADdmg = myHero:CalcDamage(enemy, dmgR)
-			if GetDistance(enemy) <= SkillR.range and enemy.health <= ADdmg and SkillR.ready and Settings.Killsteal.UseR then
+			local rDmg = getDmg("R", enemy, myHero)
+			if GetDistance(enemy) <= SkillR.range and enemy.health <= rDmg and SkillR.ready and Settings.Killsteal.UseR then
 				CastSpell(_R)
 			end
 		end
