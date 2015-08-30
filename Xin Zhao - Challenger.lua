@@ -98,7 +98,28 @@ function Menu()
 	Settings:addSubMenu("["..myHero.charName.."] - Harass Settings", "Harass")
 		Settings.Harass:addParam("UseQ", "Use (Q) in Harass", SCRIPT_PARAM_ONOFF, true)
 		Settings.Harass:addParam("UseE", "Use (E) in Harass", SCRIPT_PARAM_ONOFF, true)
-		Settings.Harass:addParam("MinMana", "Minimum Mana to Harass:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+		Settings.Harass:addParam("MinMana", "Minimum Mana Percentage:", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+
+	Settings:addSubMenu("["..myHero.charName.."] - Lane Settings", "Lane")
+		Settings.Lane:addParam("UseQ", "Use (Q) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
+		Settings.Lane:addParam("UseW", "Use (W) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
+		Settings.Lane:addParam("UseE", "Use (E) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
+		Settings.Lane:addParam("MinMana", "Minimum Mana Percentage:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+
+	Settings:addSubMenu("["..myHero.charName.."] - Jungle Settings", "Jungle")
+		Settings.Jungle:addParam("UseQ", "Use (Q) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
+		Settings.Jungle:addParam("UseW", "Use (W) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
+		Settings.Jungle:addParam("UseE", "USe (E) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
+
+	Settings:addSubMenu("["..myHero.charName.."] - Skill Settings", "Skill")
+		Settings.Skill:addSubMenu("["..SkillR.name.."] (R) Settings", "RSkill")
+			Settings.Skill.RSkill:addParam("StunCount", "Minimum Enemies to Stun:", SCRIPT_PARAM_SLICE, 2, 0, 5, 0)
+
+	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
+
+	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.range)
+	TargetSelector.name = "XinZhao"
+	Settings:addTS(TargetSelector)
 end
 
 
