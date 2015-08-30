@@ -37,9 +37,10 @@
               - Fixed Q/E calls on jungling
               - Temporarily removed ally ulting
               - Temporarily disabled automatic Zhonyas
+			  - E Cast
 --]]
 
-local version = "1.075"
+local version = "1.0751"
 local author = "Titos"
 local TextList = {"Do Not Chase", "You Can Chase", "Ally Can Chase"}
 local ChaseText = {}
@@ -294,7 +295,7 @@ function Combo(unit)
 			end
 		end
 		if Settings.Combo.UseE and SkillE.ready then
-			if GetDistance(unit) < SkillE.range then
+			if GetDistance(unit) <= SkillE.range then
 				CastSpell(_E)
 			end
 		end
@@ -329,14 +330,14 @@ end
 
 function Harass(unit)
 	if ValidTarget(unit) and unit ~= nil and unit.type == myHero.type then
-		if myHero.mana > (myHero.maxMana * (Settings.Harass.MinMana / 100)) then
+		if myHero.mana >= (myHero.maxMana * (Settings.Harass.MinMana / 100)) then
 			if Settings.Harass.UseQ and SkillQ.ready then
 				if GetDistance(unit) <= SkillQ.range then
 					CastSpell(_Q, unit)
 				end
 			end
 			if Settings.Harass.UseE and SkillE.ready then
-				if GetDistance(unit) < SkillE.range then
+				if GetDistance(unit) <= SkillE.range then
 					CastSpell(_E)
 				end
 			end
