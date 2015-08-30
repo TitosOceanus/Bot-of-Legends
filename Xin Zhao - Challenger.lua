@@ -56,22 +56,12 @@ end
 function OnTick()
 	Target = GetOrbTarget()
 	ComboKey = Settings.Keybind.ComboKey
-	HarassKey = Settings.Keybind.HarassKey
-	ClearKey = Settings.Keybind.ClearKey
 	Checks()
 
 	if ComboKey then
-		Combo()
+		Combo(Target)
 	end
 
-	if HarassKey then
-		Harass()
-	end
-
-	if ClearKey then
-		LaneClear()
-		JungleClear()
-	end
 end
 
 function Variables()
@@ -131,7 +121,7 @@ function OnDraw()
 			DrawCircle(myHero.x, myHero.y, myHero.z, SkillR.range, ARGB(255, 180, 4, 0))
 		end
 	
-		if Settings.Draw.targetcircle and Target then
+		if Settings.Draw.Targetcircle and Target then
 			DrawCircle(Target.x, Target.y, Target.z, 100, ARGB(255, 180, 4, 0))
 		end
 	end
@@ -187,7 +177,7 @@ function Menu()
 		Settings.Draw:addParam("Disable", "Disable Range Drawings", SCRIPT_PARAM_ONOFF, false)
 		Settings.Draw:addParam("eDraw", "Draw "..SkillE.name.." (E) Range", SCRIPT_PARAM_ONOFF, true)
 		Settings.Draw:addParam("rDraw", "Draw "..SkillR.name.." (R) Range", SCRIPT_PARAM_ONOFF, true)
-		Settings.Draw:addParam("targetcircle", "Draw Target Circle", SCRIPT_PARAM_ONOFF, true)
+		Settings.Draw:addParam("Targetcircle", "Draw Target Circle", SCRIPT_PARAM_ONOFF, true)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
 
@@ -196,10 +186,10 @@ function Menu()
 	Settings:addTS(TargetSelector)
 end
 
-function DefaultCombo(target)
-	if ValidTarget(target) then
-		if GetDistance(target) <= SkillE.range and SkillE.ready then
-			CastSpell(_E, target)
+function DefaultCombo(Target)
+	if ValidTarget(Target) then
+		if GetDistance(Target) <= SkillE.range and SkillE.ready then
+			CastSpell(_E, Target)
 			if SACLoaded then
 				AA = 0
 			end
@@ -211,7 +201,7 @@ function DefaultCombo(target)
 				AA = 0
 			end
 		end
-		if GetDistance(target) <= 175 then	
+		if GetDistance(Target) <= 175 then	
 			if SACLoaded and AA >= 1 and SkillQ.ready then
 				CastSpell(_Q)
 				AA = 0
@@ -225,24 +215,24 @@ function DefaultCombo(target)
 	end
 end
 
-function Combo(target)
-	if ValidTarget(target) then
+function Combo(Target)
+	if ValidTarget(Target) then
 		if Settings.Combo.UseR == 1 then
-			DefaultCombo()
+			DefaultCombo(Target)
 		elseif Settings.Combo.UseR == 2 then
 			if SkillR.ready then
-				if CountEnemyHeroInRange(SkillE.range, myHero) == 1 and not TargetHaveBuff("xenzhaointimidate", target) then
-					if GetDistance(target) <= SkillR.range then
+				if CountEnemyHeroInRange(SkillE.range, myHero) == 1 and not TargetHaveBuff("xenzhaointimidate", Target) then
+					if GetDistance(Target) <= SkillR.range then
 						CastSpell(_R)
 						if SACLoaded then
 							AA = 0
 						end
 					end
 				else
-					DefaultCombo()
+					DefaultCombo(Target)
 				end
 			else
-				DefaultCombo()
+				DefaultCombo(Target)
 			end
 		end
 	end
