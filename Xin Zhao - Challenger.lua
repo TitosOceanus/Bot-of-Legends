@@ -285,16 +285,15 @@ end
 
 function JungleClear()
 	JungleMinions:update()
-	for i, minion in ipairs(JungleMinions.objects) do
-		if GetDistance(minion) <= SkillE.range and SkillE.ready and Settings.Jungle.UseE then
-			CastSpell(_E, minion)
-		end
-		if GetDistance(minion) <= 175 and SkillQ.ready and Settings.Jungle.UseQ then
-			CastSpell(_Q)
-		end
-		if GetDistance(minion) <= 175 and SkillW.ready and Settings.Jungle.UseW then
-			CastSpell(_W)
-		end
+	JungleCreep = JungleMinions.objects[1]
+	if GetDistance(JungleCreep) <= SkillE.range and SkillE.ready and Settings.Jungle.UseE then
+		CastSpell(_E, JungleCreep)
+	end
+	if GetDistance(JungleCreep) <= 175 and SkillQ.ready and Settings.Jungle.UseQ then
+		CastSpell(_Q)
+	end
+	if GetDistance(JungleCreep) <= 175 and SkillW.ready and Settings.Jungle.UseW then
+		CastSpell(_W)
 	end
 end
 			
