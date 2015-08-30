@@ -166,7 +166,7 @@ function Menu()
 	Settings:addSubMenu("["..myHero.charName.."] - Lane Settings", "Lane")
 		Settings.Lane:addParam("UseQ", "Use (Q) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Lane:addParam("UseW", "Use (W) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
-		Settings.Lane:addParam("UseE", "Use (E) in Lane Clear", SCRIPT_PARAM_ONOFF, true)
+		Settings.Lane:addParam("UseE", "Use (E) in Lane Clear", SCRIPT_PARAM_ONOFF, false)
 		Settings.Lane:addParam("MinMana", "Minimum Mana Percentage:", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
 
 	Settings:addSubMenu("["..myHero.charName.."] - Jungle Settings", "Jungle")

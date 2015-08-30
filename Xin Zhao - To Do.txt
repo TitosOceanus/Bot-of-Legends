@@ -9,3 +9,4 @@ To Do:
 7) Ult Interrupter
 8) Combo Toggle: Smart & Normal
 9) Drag/Baron/Buff steal w/ E
+10) Flash -> Combo
