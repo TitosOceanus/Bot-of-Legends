@@ -49,7 +49,19 @@ if myHero.charName ~= "XinZhao" then return end
 function OnLoad()
 	print("<b><font color=\"#00FFFF\">Titos and GeorgeDude: <font color=\"#B40404\">Xin Zhao <font color=\"#FFFF00\">- <font color=\"#B40404\">Challenger <font color=\"#FFFF00\">["..version.."] <font color=\"#B40404\">Loaded.</font>")
 	Menu()
+	Variables()
 	DelayAction(function() LoadOrbwalker() end, 10)
+end
+
+function Variables()
+	SkillQ = { name = "Three Talon Strike", range = nil, ready = false }
+	SkillW = { name = "Battle Cry", range = nil, ready = false }
+	SkillE = { name = "Audacious Charge", range = 600, ready = false }
+	SkillR = { name = "Crescent Sweep", range = 187.5, ready = false }
+
+	EnemyMinions = minionManager(MINION_ENEMY, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
+	JungleMinions = minionManager(MINION_JUNGLE, SkillE.range, myHero, MINION_SORT_MAXHEALTH_DEC)
+	
 end
 
 function LoadOrbwalker()
