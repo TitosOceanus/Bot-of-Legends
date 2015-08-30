@@ -5,7 +5,7 @@ To Do:
 3) Lane Clear
 4) Jungle Clear
 5) Killsteal
-6) Autoattack Reset
+6) Autoattack Reset for SAC
 7) Ult Interrupter
 8) Combo Toggle: Smart & Normal
 9) Drag/Baron/Buff steal w/ E
