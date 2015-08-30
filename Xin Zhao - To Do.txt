@@ -1,14 +1,14 @@
 To Do:
 
-2) Harass
-3) Lane Clear
-4) Jungle Clear
-5) Killsteal
-6) Autoattack Reset for SAC
-7) Ult Interrupter
-8) Combo Toggle: Smart & Normal
-9) Drag/Baron/Buff steal w/ E
-10) Flash -> Combo
-11) Auto Attack Kill Text
-12) Damage on Enemy HP Bar
-13)Flash -> Insec
+- Harass
+- Lane Clear
+- Jungle Clear
+- Killsteal
+- Autoattack Reset for SAC
+- Ult Interrupter
+- Combo Toggle: Smart & Normal
+- Drag/Baron/Buff steal w/ E
+- Flash -> Combo
+- Auto Attack Kill Text
+- Damage on Enemy HP Bar
+- Flash -> Insec
