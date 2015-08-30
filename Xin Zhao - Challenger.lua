@@ -191,7 +191,7 @@ function Menu()
 
 	Settings:addSubMenu("["..myHero.charName.."] - Orbwalker Settings", "Orbwalker")
 
-	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.ready)
+	TargetSelector = TargetSelector(TARGET_LESS_CAST_PRIORITY, SkillE.range)
 	TargetSelector.name = "XinZhao"
 	Settings:addTS(TargetSelector)
 end
