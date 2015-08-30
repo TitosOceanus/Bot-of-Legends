@@ -12,3 +12,4 @@ To Do:
 10) Flash -> Combo
 11) Auto Attack Kill Text
 12) Damage on Enemy HP Bar
+13)Flash -> Insec
