@@ -5,7 +5,6 @@ To Do:
 - Jungle Clear
 - Killsteal
 - Autoattack Reset for SAC
-- Ult Interrupter
 - Combo Toggle: Smart & Normal
 - Drag/Baron/Buff steal w/ E
 - Flash -> Combo
