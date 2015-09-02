@@ -51,6 +51,7 @@ function OnLoad()
 	Variables()
 	Menu()
 	DelayAction(function() LoadOrbwalker() end, 10)
+		Interrupt()
 end
 
 function OnTick()
@@ -61,6 +62,7 @@ function OnTick()
 	if ComboKey then
 		Combo(Target)
 	end
+
 
 end
 
@@ -199,6 +201,11 @@ function Menu()
 		Settings.Jungle:addParam("UseW", "Use (W) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
 		Settings.Jungle:addParam("UseE", "USe (E) in Jungle Clear", SCRIPT_PARAM_ONOFF, true)
 
+
+	Settings:addSubMenu("["..myHero.charName.."] - Interrupt Settings", "interrupt")
+		Settings.interrupt:addParam("interruptR","Use R to Interrupt",SCRIPT_PARAM_ONOFF, true)
+		Settings.interrupt:addParam("interruptQ","Use Q to Interrupt",SCRIPT_PARAM_ONOFF, true)
+	
 	Settings:addSubMenu("["..myHero.charName.."] - Draw Settings", "Draw")
 		Settings.Draw:addParam("Disable", "Disable Range Drawings", SCRIPT_PARAM_ONOFF, false)
 		Settings.Draw:addParam("eDraw", "Draw "..SkillE.name.." (E) Range", SCRIPT_PARAM_ONOFF, true)
@@ -334,3 +341,78 @@ end
 
 
 
+
+
+function Interrupt()
+  
+   ToInterrupt = {}
+   InterruptList = {
+    { charName = "Caitlyn", spellName = "CaitlynAceintheHole"},
+    { charName = "FiddleSticks", spellName = "Crowstorm"},
+    { charName = "Galio", spellName = "GalioIdolOfDurand"},
+    { charName = "Karthus", spellName = "FallenOne"},
+    { charName = "Katarina", spellName = "KatarinaR"},
+    { charName = "Lucian", spellName = "LucianR"},
+    { charName = "Malzahar", spellName = "AlZaharNetherGrasp"},
+    { charName = "MissFortune", spellName = "MissFortuneBulletTime"},
+    { charName = "Nunu", spellName = "AbsoluteZero"},                            
+    { charName = "Pantheon", spellName = "Pantheon_GrandSkyfall_Jump"},
+    { charName = "Shen", spellName = "ShenStandUnited"},
+    { charName = "Urgot", spellName = "UrgotSwap2"},
+    { charName = "Warwick", spellName = "InfiniteDuress"},
+    { charName = "Velkoz", spellName = "VelkozR"}
+  }
+  for i = 1, heroManager.iCount, 1 do
+    enemy = heroManager:getHero(i)
+    if enemy.team ~= myHero.team then
+      for _, champ in pairs(InterruptList) do
+        if enemy.charName == champ.charName then
+          table.insert(ToInterrupt, champ.spellName)
+        end
+      end
+    end
+  end
+
+end
+  
+end
+
+function PassiveActive(Target)
+    for i = 1, Target.buffCount do
+        local tBuff = Target:getBuff(i)
+        if BuffIsValid(tBuff) and (tBuff.name == "xenzhaointimidate") then
+            return true
+        end
+    end 
+    return false
+end
+
+function OnProcessSpell(unit, spell)
+  Target=GetOrbTarget()
+  if Target ~= nil then
+    if Settings.interrupt.interruptR and SkillR.ready and #ToInterrupt > 0 and PassiveActive(Target) == false then
+      for _, ability in pairs(ToInterrupt) do
+        if spell.name == ability and unit.team ~= myHero.team then
+          if GetDistance(Target) <= SkillR.range then CastSpell(_R)
+          
+          end
+        end
+      end
+    end
+
+    if Settings.interrupt.interruptQ and SkillQ.ready and #ToInterrupt > 0 then
+      for _, ability in pairs(ToInterrupt) do
+        if spell.name == ability and unit.team ~= myHero.team then
+          if GetDistance(Target) <= 175 then
+          CastSpell(_Q)
+          myHero:Attack(Target)
+          
+          end
+        end
+      end
+    end
+  end
+
+
+
+	
